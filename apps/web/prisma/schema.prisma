@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model brand {
+  id                           BigInt            @id @default(autoincrement())
+  slug                         String
+  name                         String
+  country                      iso_country_code?
+  is_deleted                   Boolean           @default(false)
+  created_at                   DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime          @default(now()) @db.Timestamptz(6)
+  product_product_brandTobrand product[]         @relation("product_brandTobrand")
+}
+
+model goose_db_version {
+  id         Int      @id @default(autoincrement())
+  version_id BigInt
+  is_applied Boolean
+  tstamp     DateTime @default(now()) @db.Timestamp(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model product {
+  id                                                               BigInt                    @id @default(autoincrement())
+  slug                                                             String
+  name                                                             String
+  brand                                                            BigInt
+  primary_category                                                 BigInt
+  visibility                                                       product_visibility
+  owner_user_id                                                    BigInt?
+  release_at                                                       DateTime?                 @db.Timestamptz(6)
+  release_precision                                                release_precision_enum?
+  is_deleted                                                       Boolean                   @default(false)
+  created_at                                                       DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                                                       DateTime                  @default(now()) @db.Timestamptz(6)
+  brand_product_brandTobrand                                       brand                     @relation("product_brandTobrand", fields: [brand], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user                                                             user?                     @relation(fields: [owner_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category                                                         category                  @relation(fields: [primary_category], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_attribute_value_product_attribute_value_productToproduct product_attribute_value[] @relation("product_attribute_value_productToproduct")
+  product_category_product_category_productToproduct               product_category[]        @relation("product_category_productToproduct")
+  product_variant_product_variant_productToproduct                 product_variant[]         @relation("product_variant_productToproduct")
+}
+
+model product_variant {
+  id                                                                                               BigInt                            @id @default(autoincrement())
+  product                                                                                          BigInt
+  slug                                                                                             String
+  name                                                                                             String
+  is_default                                                                                       Boolean                           @default(false)
+  release_at                                                                                       DateTime?                         @db.Timestamptz(6)
+  release_precision                                                                                release_precision_enum?
+  is_deleted                                                                                       Boolean                           @default(false)
+  created_at                                                                                       DateTime                          @default(now()) @db.Timestamptz(6)
+  updated_at                                                                                       DateTime                          @default(now()) @db.Timestamptz(6)
+  product_product_variant_productToproduct                                                         product                           @relation("product_variant_productToproduct", fields: [product], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_variant_attribute_value_product_variant_attribute_value_product_variantToproduct_variant product_variant_attribute_value[] @relation("product_variant_attribute_value_product_variantToproduct_variant")
+}
+
+model user {
+  id            BigInt    @id @default(autoincrement())
+  username      String
+  email         String
+  password_hash String
+  is_deleted    Boolean   @default(false)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @default(now()) @db.Timestamptz(6)
+  product       product[]
+}
+
+model attribute {
+  id                                                           BigInt                @id @default(autoincrement())
+  slug                                                         String
+  name                                                         String
+  description                                                  String?
+  type                                                         attribute_type
+  number_unit                                                  number_unit           @default(NA)
+  is_deleted                                                   Boolean               @default(false)
+  created_at                                                   DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at                                                   DateTime              @default(now()) @db.Timestamptz(6)
+  category_attribute                                           category_attribute[]
+  enum_attribute_vals_enum_attribute_vals_attributeToattribute enum_attribute_vals[] @relation("enum_attribute_vals_attributeToattribute")
+}
+
+model category {
+  id                                                   BigInt               @id @default(autoincrement())
+  slug                                                 String
+  name                                                 String
+  description                                          String?
+  parent_category                                      BigInt?
+  is_deleted                                           Boolean              @default(false)
+  created_at                                           DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at                                           DateTime             @default(now()) @db.Timestamptz(6)
+  category                                             category?            @relation("categoryTocategory", fields: [parent_category], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_category                                       category[]           @relation("categoryTocategory")
+  category_attribute                                   category_attribute[]
+  product                                              product[]
+  product_category_product_category_categoryTocategory product_category[]   @relation("product_category_categoryTocategory")
+}
+
+model enum_attribute_vals {
+  id                                                 BigInt                            @id @default(autoincrement())
+  attribute                                          BigInt
+  slug                                               String
+  name                                               String
+  display_order                                      Int
+  is_deleted                                         Boolean                           @default(false)
+  created_at                                         DateTime                          @default(now()) @db.Timestamptz(6)
+  updated_at                                         DateTime                          @default(now()) @db.Timestamptz(6)
+  attribute_enum_attribute_vals_attributeToattribute attribute                         @relation("enum_attribute_vals_attributeToattribute", fields: [attribute], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_attribute_value                            product_attribute_value[]
+  product_variant_attribute_value                    product_variant_attribute_value[]
+}
+
+model product_attribute_value {
+  id                                               BigInt               @id @default(autoincrement())
+  product                                          BigInt
+  category_attribute                               BigInt
+  number_value                                     Float?
+  string_value                                     String?
+  bool_value                                       Boolean?
+  enum_value                                       BigInt?
+  is_deleted                                       Boolean              @default(false)
+  created_at                                       DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at                                       DateTime             @default(now()) @db.Timestamptz(6)
+  category_attribute_rel                           category_attribute   @relation(fields: [category_attribute], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  enum_attribute_vals                              enum_attribute_vals? @relation(fields: [enum_value], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_product_attribute_value_productToproduct product              @relation("product_attribute_value_productToproduct", fields: [product], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model category_attribute {
+  id                              BigInt                            @id @default(autoincrement())
+  category                        BigInt
+  attribute                       BigInt
+  priority                        Int                               @default(0)
+  is_deleted                      Boolean                           @default(false)
+  created_at                      DateTime                          @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime                          @default(now()) @db.Timestamptz(6)
+  attribute_rel                   attribute                         @relation(fields: [attribute], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category_rel                    category                          @relation(fields: [category], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_attribute_value         product_attribute_value[]
+  product_variant_attribute_value product_variant_attribute_value[]
+}
+
+model product_category {
+  id                                           BigInt   @id @default(autoincrement())
+  product                                      BigInt
+  category                                     BigInt
+  is_deleted                                   Boolean  @default(false)
+  created_at                                   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                                   DateTime @default(now()) @db.Timestamptz(6)
+  category_product_category_categoryTocategory category @relation("product_category_categoryTocategory", fields: [category], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_product_category_productToproduct    product  @relation("product_category_productToproduct", fields: [product], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model product_variant_attribute_value {
+  id                                                                               BigInt               @id @default(autoincrement())
+  product_variant                                                                  BigInt
+  category_attribute                                                               BigInt
+  number_value                                                                     Float?
+  string_value                                                                     String?
+  bool_value                                                                       Boolean?
+  enum_value                                                                       BigInt?
+  is_deleted                                                                       Boolean              @default(false)
+  created_at                                                                       DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at                                                                       DateTime             @default(now()) @db.Timestamptz(6)
+  category_attribute_rel                                                           category_attribute   @relation(fields: [category_attribute], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  enum_attribute_vals                                                              enum_attribute_vals? @relation(fields: [enum_value], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_variant_product_variant_attribute_value_product_variantToproduct_variant product_variant      @relation("product_variant_attribute_value_product_variantToproduct_variant", fields: [product_variant], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum attribute_type {
+  number
+  bool
+  enum_list
+  string
+}
+
+enum change_event_enum {
+  minor_update
+  major_update
+}
+
+enum iso_country_code {
+  AU
+  US
+  GB
+  CA
+  NZ
+}
+
+enum number_unit {
+  weight_g
+  length_mm
+  volume_ml
+  int
+  float
+  NA
+}
+
+enum product_visibility {
+  public
+  private
+  link_access
+}
+
+enum release_precision_enum {
+  year
+  month
+  day
+  minute
+}

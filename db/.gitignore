@@ -1,0 +1,17 @@
+# Ignore generated files
+gen/
+
+# Ignore local database dumps
+*.dump
+*.sql.bak
+*.backup
+
+# Ignore test databases
+test.db
+*.test.db
+
+# Ignore editor files
+.DS_Store
+*.swp
+*.swo
+*~

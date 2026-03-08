@@ -1,0 +1,205 @@
+{
+  "main": {
+    "id": "ea52de0b64f58d78",
+    "type": "split",
+    "children": [
+      {
+        "id": "50c41f570024cf76",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3a85fb732ee053c7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "technical/DB.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "DB"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "61b5c161e6bb9f3c",
+    "type": "split",
+    "children": [
+      {
+        "id": "e6015857c63ab939",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d20048fdcf664480",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "b786956c43f387a7",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "cf8f9220fcd3396b",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "0cd4b46d6d6897f3",
+    "type": "split",
+    "children": [
+      {
+        "id": "639537b16870699e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "35ed6737d185c849",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Gear Garage.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Gear Garage"
+            }
+          },
+          {
+            "id": "6f54cae6a5e07021",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Gear Garage.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Gear Garage"
+            }
+          },
+          {
+            "id": "b0d644f63f9a0e7b",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "e54e611ef45acb5a",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "7b40e8db6aaa782b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Gear Garage.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Gear Garage"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "3a85fb732ee053c7",
+  "lastOpenFiles": [
+    "technical/Product Search.md",
+    "technical/Design Inventory (Patterns).md",
+    "technical/DB.md",
+    "TODO/TODO.md",
+    "TODO/db.md",
+    "TODO",
+    "technical",
+    "Gear Garage.md",
+    "Design Inventory (Patterns).md",
+    "TODO.md",
+    "For Neelos.md",
+    "DB.md",
+    "Rough One Page Investor Summary.md",
+    "Product Ideas/TODO.md",
+    "Product Ideas/Future Ideas.md",
+    "Product Ideas"
+  ]
+}

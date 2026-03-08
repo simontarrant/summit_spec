@@ -1,0 +1,1 @@
+this directory needs to exist for the initialization of docker db
