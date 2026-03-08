@@ -3,7 +3,8 @@
         web-dev web-build web-start web-clean \
         prisma-pull prisma-generate prisma-studio \
         dev-all stop-all \
-        status check clean-all
+        status check clean-all \
+        test-db-up test-db-down test-db-migrate test test-watch
 
 # Colors for output
 CYAN := \033[36m
@@ -43,6 +44,13 @@ help:
 	@echo "  make prisma-pull        - Pull database schema into Prisma (introspect)"
 	@echo "  make prisma-generate    - Generate Prisma client from schema"
 	@echo "  make prisma-studio      - Open Prisma Studio database GUI"
+	@echo ""
+	@echo "$(GREEN)Testing:$(RESET)"
+	@echo "  make test-db-up         - Start test PostgreSQL container (port 5433)"
+	@echo "  make test-db-down       - Stop test PostgreSQL container"
+	@echo "  make test-db-migrate    - Run migrations against test database"
+	@echo "  make test               - Run test suite"
+	@echo "  make test-watch         - Run tests in watch mode"
 	@echo ""
 	@echo "$(GREEN)Maintenance:$(RESET)"
 	@echo "  make install            - Install all dependencies"
@@ -191,3 +199,36 @@ status:
 	@echo ""
 	@echo "$(YELLOW)Services:$(RESET)"
 	@pgrep -f "next dev" >/dev/null && echo "  $(GREEN)✓$(RESET) Next.js dev server running" || echo "  $(YELLOW)○$(RESET) Next.js not running"
+
+# =============================================================================
+# Testing
+# =============================================================================
+
+test-db-up:
+	@echo "$(CYAN)Starting test database...$(RESET)"
+	@cd db && $(MAKE) test-docker-up
+
+test-db-down:
+	@echo "$(CYAN)Stopping test database...$(RESET)"
+	@cd db && $(MAKE) test-docker-down
+
+test-db-migrate:
+	@echo "$(CYAN)Running test database migrations...$(RESET)"
+	@cd db && $(MAKE) test-migrate-up
+
+test:
+	@if ! docker ps --filter name=gear_garage_test_db --format '{{.Names}}' | grep -q gear_garage_test_db; then \
+		echo "$(YELLOW)Test database not running, starting it...$(RESET)"; \
+		$(MAKE) --no-print-directory test-db-up; \
+		$(MAKE) --no-print-directory test-db-migrate; \
+	fi
+	@echo "$(CYAN)Running tests...$(RESET)"
+	@cd apps/web && npm test
+
+test-watch:
+	@if ! docker ps --filter name=gear_garage_test_db --format '{{.Names}}' | grep -q gear_garage_test_db; then \
+		echo "$(YELLOW)Test database not running, starting it...$(RESET)"; \
+		$(MAKE) --no-print-directory test-db-up; \
+		$(MAKE) --no-print-directory test-db-migrate; \
+	fi
+	@cd apps/web && npm run test:watch

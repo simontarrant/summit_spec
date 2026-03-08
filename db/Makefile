@@ -5,7 +5,8 @@ export
 .PHONY: help docker-up docker-down docker-restart docker-logs docker-reset docker-nuke \
         migrate-up migrate-down migrate-status migrate-reset \
         seed generate verify clean \
-        setup reset status
+        setup reset status \
+        test-docker-up test-docker-down test-migrate-up
 
 # Default target
 help:
@@ -157,6 +158,27 @@ reset: docker-reset
 	@echo "✓ Search index rebuilt"
 	@echo "✓ Database reset and setup complete!"
 	@echo "  Connection: $(DATABASE_URL)"
+
+# Test database commands
+TEST_DATABASE_URL ?= postgresql://simontarrant:password@localhost:5433/gear_garage_test?sslmode=disable
+
+test-docker-up:
+	@echo "Starting test PostgreSQL container..."
+	docker compose -f docker-compose.test.yml up -d --build
+	@echo "Waiting for test PostgreSQL to be ready..."
+	@sleep 3
+	@docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U $(POSTGRES_USER) -d gear_garage_test || (sleep 2 && docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U $(POSTGRES_USER) -d gear_garage_test)
+	@echo "✓ Test PostgreSQL is ready"
+
+test-docker-down:
+	@echo "Stopping test PostgreSQL container..."
+	docker compose -f docker-compose.test.yml down
+	@echo "✓ Test PostgreSQL stopped"
+
+test-migrate-up:
+	@echo "Applying migrations to test database..."
+	cd migrations && goose postgres "$(TEST_DATABASE_URL)" up
+	@echo "✓ Test migrations applied"
 
 # Debugging and status
 status:

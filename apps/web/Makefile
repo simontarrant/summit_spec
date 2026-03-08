@@ -3,7 +3,7 @@
 -include .env
 export
 
-.PHONY: help dev build start lint test clean install \
+.PHONY: help dev build start lint test test-watch clean install \
         prisma-pull prisma-generate prisma-studio \
         prisma-pull-help prisma-generate-help prisma-studio-help prisma-help
 
@@ -16,7 +16,8 @@ help:
 	@echo "  make build           - Build production bundle"
 	@echo "  make start           - Start production server"
 	@echo "  make lint            - Run ESLint"
-	@echo "  make test            - Run tests (if configured)"
+	@echo "  make test            - Run tests"
+	@echo "  make test-watch      - Run tests in watch mode"
 	@echo ""
 	@echo "Prisma commands:"
 	@echo "  make prisma-pull     - Pull database schema into Prisma (introspect)"
@@ -62,11 +63,10 @@ lint:
 # Run tests
 test:
 	@echo "Running tests..."
-	@if grep -q "\"test\":" package.json; then \
-		npm run test; \
-	else \
-		echo "No test script found in package.json"; \
-	fi
+	npm test
+
+test-watch:
+	npm run test:watch
 
 # Clean build artifacts
 clean:
