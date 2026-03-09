@@ -234,6 +234,7 @@ export function ProductSearch() {
 
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [filterState, setFilterState] = useState<FilterState>({});
+  const [filtersCollapsed, setFiltersCollapsed] = useState(true);
   const [sort, setSort] = useState<SortSpec | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
@@ -442,12 +443,27 @@ export function ProductSearch() {
       />
       {categoryId && (
         <>
-          <div className="w-px h-6 bg-grey-200" />
-          <FilterPanel
-            attributes={resolvedAttributes}
-            filterState={filterState}
-            onChange={handleFilterChange}
-          />
+          <button
+            type="button"
+            className="ui-button-primary text-sm px-3 py-1.5"
+            aria-expanded={!filtersCollapsed}
+            aria-controls="product-filter-controls"
+            onClick={() => setFiltersCollapsed((prev) => !prev)}
+          >
+            {filtersCollapsed ? "Show Filters" : "Hide Filters"}
+          </button>
+          {!filtersCollapsed && (
+            <>
+              <div className="w-px h-6 bg-grey-200" />
+              <div id="product-filter-controls">
+                <FilterPanel
+                  attributes={resolvedAttributes}
+                  filterState={filterState}
+                  onChange={handleFilterChange}
+                />
+              </div>
+            </>
+          )}
         </>
       )}
     </div>
