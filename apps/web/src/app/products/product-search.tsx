@@ -255,6 +255,11 @@ export function ProductSearch() {
     return resolveAttributes(schema, categoryId);
   }, [schema, categoryId]);
 
+  const hasActiveFilters = useMemo(() => {
+    if (!schema) return false;
+    return buildApiFilters(filterState, schema.attributes).length > 0;
+  }, [schema, filterState]);
+
   // Fetch schema on mount
   useEffect(() => {
     let cancelled = false;
@@ -408,6 +413,11 @@ export function ProductSearch() {
     []
   );
 
+  const handleClearFilters = useCallback(() => {
+    setFilterState({});
+    setPage(1);
+  }, []);
+
   const handleSort = useCallback(
     (attributeId: string) => {
       setSort((prev) => {
@@ -443,15 +453,25 @@ export function ProductSearch() {
           onChange={handleCategoryChange}
         />
         {categoryId && (
-          <button
-            type="button"
-            className="ui-button-primary text-sm px-3 py-1.5"
-            aria-expanded={!filtersCollapsed}
-            aria-controls="product-filter-controls"
-            onClick={() => setFiltersCollapsed((prev) => !prev)}
-          >
-            {filtersCollapsed ? "Show Filters" : "Hide Filters"}
-          </button>
+          <>
+            <button
+              type="button"
+              className="ui-button-primary text-sm px-3 py-1.5"
+              aria-expanded={!filtersCollapsed}
+              aria-controls="product-filter-controls"
+              onClick={() => setFiltersCollapsed((prev) => !prev)}
+            >
+              {filtersCollapsed ? "Show Filters" : "Hide Filters"}
+            </button>
+            <button
+              type="button"
+              className="ui-button-accent text-sm px-3 py-1.5"
+              onClick={handleClearFilters}
+              disabled={!hasActiveFilters}
+            >
+              Clear Filters
+            </button>
+          </>
         )}
       </div>
       {categoryId && !filtersCollapsed && (
