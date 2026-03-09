@@ -679,6 +679,43 @@ Build the **search table UI** using the APIs.
 
 ---
 
+## Architecture: Client Components with URL Sync
+
+Use **client components** for all interactive parts of the search UI.
+
+**Rationale:**
+
+- Filter changes must feel instant. Server components require a full server round-trip on every filter change, which is unacceptable for a filter-heavy search UI.
+- The POST `/api/products/search` endpoint already exists and is the correct integration point — bypassing it would duplicate logic.
+- Debouncing range inputs (e.g. user typing a min weight) is trivial with local state; it is significantly harder with URL-first RSC routing.
+- The app is behind auth, so SEO is irrelevant.
+
+**Component structure:**
+
+```
+app/products/page.tsx          ← server component (layout, shell)
+  └── <ProductSearch>          ← "use client" — owns all search state
+        ├── <CategorySelector>
+        ├── <FilterPanel>       ← renders controls per attribute type
+        ├── <ResultsTable>      ← renders columns/rows from POST response
+        └── <Pagination>
+```
+
+**State flow:**
+
+1. User changes category / filter / sort / page
+2. `<ProductSearch>` updates local state
+3. Debounced effect fires `POST /api/products/search`
+4. Response updates results; table shows loading skeleton during fetch
+5. State is also synced to URL search params for shareability
+
+**Filter debouncing:**
+
+- Range number inputs: debounce ~400ms before triggering fetch
+- Toggle, enum, pagination: trigger immediately
+
+---
+
 ## Required UI
 
 The page must include:
