@@ -126,23 +126,25 @@ function NumberFilterControl({
     <div className="flex flex-col gap-0.5">
       <span className="filter-group-label">{label}</span>
       <div className="flex items-center gap-1">
-        <LinearNumberInput
-          value={state.min}
-          onChange={(e) =>
-            onChange({ ...state, min: e.target.value })
-          }
-          placeholder="Min"
-          className="w-16"
-        />
+        <div className="w-12">
+          <LinearNumberInput
+            value={state.min}
+            onChange={(e) =>
+              onChange({ ...state, min: e.target.value })
+            }
+            placeholder="Min"
+          />
+        </div>
         <span className="text-xs text-slate">–</span>
-        <LinearNumberInput
-          value={state.max}
-          onChange={(e) =>
-            onChange({ ...state, max: e.target.value })
-          }
-          placeholder="Max"
-          className="w-16"
-        />
+        <div className="w-12">
+          <LinearNumberInput
+            value={state.max}
+            onChange={(e) =>
+              onChange({ ...state, max: e.target.value })
+            }
+            placeholder="Max"
+          />
+        </div>
       </div>
     </div>
   );
