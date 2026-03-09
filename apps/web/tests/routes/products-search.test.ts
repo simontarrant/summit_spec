@@ -1025,6 +1025,96 @@ describe("POST /api/products/search", () => {
       });
     });
 
+    it("selected + parent attributes share priority tier before descendants", async () => {
+      const parent = await createCategory({ slug: "sleep", name: "Sleep" });
+      const selected = await createCategory({
+        slug: "pads",
+        name: "Pads",
+        parent_category: parent.id,
+      });
+      const child = await createCategory({
+        slug: "ultralight-pads",
+        name: "Ultralight Pads",
+        parent_category: selected.id,
+      });
+
+      const selectedAttr = await createAttribute({
+        slug: "r-value",
+        name: "R Value",
+        type: "number",
+      });
+      const parentAttr = await createAttribute({
+        slug: "weight",
+        name: "Weight",
+        type: "number",
+      });
+      const childAttr = await createAttribute({
+        slug: "thickness",
+        name: "Thickness",
+        type: "number",
+      });
+
+      await createCategoryAttribute(selected.id, selectedAttr.id, { priority: 1 });
+      await createCategoryAttribute(parent.id, parentAttr.id, { priority: 5 });
+      await createCategoryAttribute(child.id, childAttr.id, { priority: 0 });
+
+      const brand = await createBrand({ slug: "b", name: "B" });
+      const product = await createProduct(brand.id, selected.id, { slug: "p", name: "P" });
+      await createVariant(product.id, { slug: "v", name: "V" });
+
+      const res = await POST(makeRequest({ categoryId: selected.id.toString() }));
+      const body = await res.json();
+
+      const attrColumnIds = body.columns
+        .filter((c: { pinned: boolean }) => !c.pinned)
+        .map((c: { attributeId: string }) => c.attributeId);
+
+      expect(attrColumnIds).toEqual([
+        selectedAttr.id.toString(),
+        parentAttr.id.toString(),
+        childAttr.id.toString(),
+      ]);
+    });
+
+    it("breaks ties between selected and parent attributes using attribute priority ranking", async () => {
+      const parent = await createCategory({ slug: "sleep", name: "Sleep" });
+      const selected = await createCategory({
+        slug: "pads",
+        name: "Pads",
+        parent_category: parent.id,
+      });
+
+      const selectedAttr = await createAttribute({
+        slug: "thickness",
+        name: "Thickness",
+        type: "number",
+      });
+      const parentAttr = await createAttribute({
+        slug: "weight",
+        name: "Weight",
+        type: "number",
+      });
+
+      await createCategoryAttribute(selected.id, selectedAttr.id, { priority: 1 });
+      await createCategoryAttribute(parent.id, parentAttr.id, { priority: 1 });
+
+      const brand = await createBrand({ slug: "b", name: "B" });
+      const product = await createProduct(brand.id, selected.id, { slug: "p", name: "P" });
+      await createVariant(product.id, { slug: "v", name: "V" });
+
+      const res = await POST(makeRequest({ categoryId: selected.id.toString() }));
+      const body = await res.json();
+
+      const attrColumnIds = body.columns
+        .filter((c: { pinned: boolean }) => !c.pinned)
+        .map((c: { attributeId: string }) => c.attributeId);
+
+      expect(attrColumnIds).toEqual([
+        selectedAttr.id.toString(),
+        parentAttr.id.toString(),
+      ]);
+    });
+
     it("enum_list has sortable=false, others sortable=true", async () => {
       const cat = await createCategory({ slug: "pads", name: "Pads" });
       const numAttr = await createAttribute({ slug: "weight", name: "Weight", type: "number" });

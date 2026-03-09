@@ -68,18 +68,40 @@ function resolveAttributes(
 
   const ancestorIds = getAncestorIds(schema.categories, categoryId) ?? [];
   const descendantIds = getDescendantIds(node);
-  const allCatIds = [...ancestorIds, categoryId, ...descendantIds];
 
   const seen = new Set<string>();
   const result: AttributeDef[] = [];
 
-  for (const catId of allCatIds) {
-    const entries = schema.categoryAttributes[catId];
-    if (!entries) continue;
-    const sorted = [...entries].sort(
+  const selectedAndAncestorEntries = [...ancestorIds, categoryId]
+    .flatMap((catId) =>
+      (schema.categoryAttributes[catId] ?? []).map((entry) => ({
+        ...entry,
+        categoryId: catId,
+      }))
+    )
+    .sort(
+      (a, b) =>
+        a.priority - b.priority ||
+        a.attributeId.localeCompare(b.attributeId) ||
+        a.categoryId.localeCompare(b.categoryId)
+    );
+
+  for (const entry of selectedAndAncestorEntries) {
+    if (seen.has(entry.attributeId)) continue;
+    seen.add(entry.attributeId);
+    const attr = schema.attributes[entry.attributeId];
+    if (attr) result.push(attr);
+  }
+
+  const sortedDescendantIds = [...descendantIds].sort((a, b) =>
+    BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0
+  );
+
+  for (const catId of sortedDescendantIds) {
+    const sortedEntries = [...(schema.categoryAttributes[catId] ?? [])].sort(
       (a, b) => a.priority - b.priority || a.attributeId.localeCompare(b.attributeId)
     );
-    for (const entry of sorted) {
+    for (const entry of sortedEntries) {
       if (seen.has(entry.attributeId)) continue;
       seen.add(entry.attributeId);
       const attr = schema.attributes[entry.attributeId];

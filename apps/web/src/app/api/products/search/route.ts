@@ -92,6 +92,12 @@ function bigintStr(v: bigint): string {
   return v.toString();
 }
 
+function compareBigInt(a: bigint, b: bigint): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 // --- Route Handler ---
 
 export async function POST(req: Request) {
@@ -541,7 +547,7 @@ export async function POST(req: Request) {
     const variantIds = variantRows.map((r) => r.variant_id);
     const allCatAttrIds = allCatAttrs.map((ca) => ca.catAttrId);
 
-    let attrValuesByVariant = new Map<string, Map<string, { type: string; value: unknown }>>();
+    const attrValuesByVariant = new Map<string, Map<string, { type: string; value: unknown }>>();
 
     if (variantIds.length > 0 && allCatAttrIds.length > 0) {
       // Query for resolved attribute values (variant overrides product)
@@ -663,33 +669,44 @@ export async function POST(req: Request) {
     }
 
     // 2. Build ordered category attribute list
-    // Determine depth of each category for ordering
-    // Ancestors are root-first, then selected category, then children
-    // ancestorIds includes the selected category; subtreeIds includes selected + descendants
+    // Selected category + ancestor categories share the same priority tier.
+    // Descendant categories remain lower priority and are grouped by category id.
+    const selectedAndAncestorCategoryIds = new Set(ancestorIds); // includes selected category
+    const selectedAndAncestorAttrs = allCatAttrs
+      .filter((ca) => selectedAndAncestorCategoryIds.has(ca.categoryId))
+      .sort(
+        (a, b) =>
+          a.priority - b.priority ||
+          compareBigInt(a.attributeId, b.attributeId) ||
+          compareBigInt(a.categoryId, b.categoryId) ||
+          compareBigInt(a.catAttrId, b.catAttrId)
+      );
 
-    // Ancestor IDs excluding the selected category, ordered root-first
-    const ancestorOnlyIds = ancestorIds.filter((id) => id !== categoryId);
-    // We need to order ancestors root-first. The recursive CTE returns them in
-    // child-to-root order, so reverse them.
-    ancestorOnlyIds.reverse();
+    for (const ca of selectedAndAncestorAttrs) {
+      const attrIdStr = ca.attributeId.toString();
+      if (addedAttrIds.has(attrIdStr)) continue;
+      const info = attrMap.get(attrIdStr);
+      if (!info) continue;
+      addedAttrIds.add(attrIdStr);
+      columns.push(makeAttrColumn(info));
+    }
 
-    // Child/descendant IDs (subtree excluding selected category)
-    const childIds = subtreeIds.filter((id) => id !== categoryId);
+    // Child/descendant IDs (subtree excluding selected category), ordered by category id
+    const childIds = subtreeIds
+      .filter((id) => id !== categoryId)
+      .sort((a, b) => compareBigInt(a, b));
 
-    // Build ordering: ancestors (root-first), then selected, then children (by id)
-    const categoryOrder: bigint[] = [
-      ...ancestorOnlyIds,
-      categoryId,
-      ...childIds.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
-    ];
+    for (const childId of childIds) {
+      const attrsForChild = allCatAttrs
+        .filter((ca) => ca.categoryId === childId)
+        .sort(
+          (a, b) =>
+            a.priority - b.priority ||
+            compareBigInt(a.attributeId, b.attributeId) ||
+            compareBigInt(a.catAttrId, b.catAttrId)
+        );
 
-    // Group catAttrs by category, sorted by priority then attribute id
-    for (const catId of categoryOrder) {
-      const attrsForCat = allCatAttrs
-        .filter((ca) => ca.categoryId === catId)
-        .sort((a, b) => a.priority - b.priority || (a.attributeId < b.attributeId ? -1 : 1));
-
-      for (const ca of attrsForCat) {
+      for (const ca of attrsForChild) {
         const attrIdStr = ca.attributeId.toString();
         if (addedAttrIds.has(attrIdStr)) continue;
         const info = attrMap.get(attrIdStr);

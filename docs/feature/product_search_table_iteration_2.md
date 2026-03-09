@@ -1,5 +1,9 @@
-# Task 1: filtered attributes take priority
+# Task 1: attribute priority of parent category
 
-- if a user selects a filter, the attirbute priority should be higher than any non-filtered attirbute
+- when the category selected is a child category with a parent, previously the logic is to place the parent attributes with higher priority
 
-- tie break between multiple filtered attirbutes with their normal priority
+- but this is not desirable, parent categories of the selected caegory should have equal prriority with the selected category. both the selected category and the parent categories will still have higher priority than child categories of the selected category
+
+- tie break between parent and selected categories with the usual priority ranking
+
+- see docs/feature/product_search_table.md for the original priority implementation
