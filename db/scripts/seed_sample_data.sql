@@ -1,5 +1,5 @@
 -- ================================================================================
--- SEED DATA FOR GEAR GARAGE
+-- SEED DATA FOR Summit Spec
 -- ================================================================================
 -- This file contains comprehensive sample data for the hiking gear catalog.
 -- Run with: psql $DATABASE_URL -f db/scripts/seed_sample_data.sql

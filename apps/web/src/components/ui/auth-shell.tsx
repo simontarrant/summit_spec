@@ -40,7 +40,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       <header className="ui-topbar">
         <div className="ui-topbar-left">
           <div className="ui-logo-mark">⛰️</div>
-          <div className="ui-logo-text">Gear Garage</div>
+          <div className="ui-logo-text">Summit Spec</div>
         </div>
         <div className="ui-topbar-right">
           <a

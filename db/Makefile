@@ -10,7 +10,7 @@ export
 
 # Default target
 help:
-	@echo "Gear Garage Database Makefile"
+	@echo "Summit Spec Database Makefile"
 	@echo ""
 	@echo "Docker commands:"
 	@echo "  make docker-up       - Start PostgreSQL container"

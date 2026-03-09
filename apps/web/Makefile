@@ -9,7 +9,7 @@ export
 
 # Default target
 help:
-	@echo "Gear Garage Web (Next.js) Makefile"
+	@echo "Summit Spec Web (Next.js) Makefile"
 	@echo ""
 	@echo "Development commands:"
 	@echo "  make dev             - Start Next.js development server"
