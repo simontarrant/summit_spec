@@ -18,6 +18,7 @@ export default function Page() {
           This page demonstrates the visual system defined in <code>globals.css</code> and THEME.md.
           Everything below uses the theme tokens, colors, spacing, and shape language.
         </p>
+        <p className="text-sm text-slate">Updated: 2026-03-10</p>
       </section>
 
       {/* Typography test */}
