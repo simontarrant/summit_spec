@@ -99,7 +99,7 @@ export async function GET() {
           numberUnit: rel.number_unit,
           enumOptions:
             rel.type === "enum_list"
-              ? enumVals.map((v) => ({
+              ? enumVals.map((v: EnumAttributeValue) => ({
                   id: v.id.toString(),
                   slug: v.slug,
                   name: v.name,
