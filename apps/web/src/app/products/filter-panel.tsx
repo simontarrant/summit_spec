@@ -1,6 +1,8 @@
+import { useState, useRef, useEffect } from "react";
 import { LinearInput } from "@/components/ui/linear-input";
 import { LinearNumberInput } from "@/components/ui/linear-number-input";
 import { LinearSelect } from "@/components/ui/linear-select";
+import { cn } from "@/lib/cn";
 import type {
   AttributeDef,
   FilterState,
@@ -172,35 +174,83 @@ function EnumFilterControl({
   value: Set<string> | null;
   onChange: (value: FilterStateValue) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const selected = value ?? new Set<string>();
   const options = attribute.enumOptions ?? [];
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const triggerLabel =
+    selected.size === 0
+      ? "Any"
+      : options
+          .filter((o) => selected.has(o.id))
+          .map((o) => o.name)
+          .join(", ");
+
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-0.5" ref={containerRef}>
       <span className="filter-group-label">{attribute.name}</span>
-      <div className="flex flex-wrap gap-2">
-        {options.map((opt) => (
-          <label
-            key={opt.id}
-            className="flex items-center gap-1 text-sm cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              checked={selected.has(opt.id)}
-              onChange={(e) => {
-                const next = new Set(selected);
-                if (e.target.checked) {
-                  next.add(opt.id);
-                } else {
-                  next.delete(opt.id);
-                }
-                onChange(next);
-              }}
-              className="accent-[var(--color-primary)]"
-            />
-            {opt.name}
-          </label>
-        ))}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className={cn(
+            "flex items-center justify-between gap-4",
+            "bg-transparent text-sm text-left cursor-pointer",
+            "border-0 border-b py-1.5 pl-1 pr-6",
+            "focus:outline-none transition-colors",
+            open
+              ? "border-slate-400"
+              : "border-slate-200 hover:border-slate-300"
+          )}
+          style={{ minWidth: "7rem" }}
+        >
+          <span className={cn(selected.size === 0 && "text-slate-400")}>
+            {triggerLabel}
+          </span>
+        </button>
+        <div className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-slate-500 text-xs">
+          ▼
+        </div>
+
+        {open && (
+          <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-slate-200 rounded shadow-md py-1 min-w-full">
+            {options.map((opt) => (
+              <label
+                key={opt.id}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer hover:bg-[var(--color-grey-50)]"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.has(opt.id)}
+                  onChange={(e) => {
+                    const next = new Set(selected);
+                    if (e.target.checked) {
+                      next.add(opt.id);
+                    } else {
+                      next.delete(opt.id);
+                    }
+                    onChange(next);
+                  }}
+                  className="accent-[var(--color-primary)]"
+                />
+                {opt.name}
+              </label>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
