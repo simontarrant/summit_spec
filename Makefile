@@ -188,7 +188,7 @@ check:
 	@command -v npm >/dev/null 2>&1 && echo "  $(GREEN)✓$(RESET) npm" || echo "  $(RED)✗$(RESET) npm (required)"
 	@echo ""
 	@echo "$(YELLOW)Database:$(RESET)"
-	@docker ps --filter name=gear_garage_db --format "  $(GREEN)✓$(RESET) PostgreSQL ({{.Status}})" 2>/dev/null || echo "  $(YELLOW)○$(RESET) PostgreSQL (not running, use: make db-up)"
+	@docker ps --filter name=summit_spec_db --format "  $(GREEN)✓$(RESET) PostgreSQL ({{.Status}})" 2>/dev/null || echo "  $(YELLOW)○$(RESET) PostgreSQL (not running, use: make db-up)"
 	@echo ""
 
 status:
@@ -217,7 +217,7 @@ test-db-migrate:
 	@cd db && $(MAKE) test-migrate-up
 
 test:
-	@if ! docker ps --filter name=gear_garage_test_db --format '{{.Names}}' | grep -q gear_garage_test_db; then \
+	@if ! docker ps --filter name=summit_spec_test_db --format '{{.Names}}' | grep -q summit_spec_test_db; then \
 		echo "$(YELLOW)Test database not running, starting it...$(RESET)"; \
 		$(MAKE) --no-print-directory test-db-up; \
 		$(MAKE) --no-print-directory test-db-migrate; \
@@ -226,7 +226,7 @@ test:
 	@cd apps/web && npm test
 
 test-watch:
-	@if ! docker ps --filter name=gear_garage_test_db --format '{{.Names}}' | grep -q gear_garage_test_db; then \
+	@if ! docker ps --filter name=summit_spec_test_db --format '{{.Names}}' | grep -q summit_spec_test_db; then \
 		echo "$(YELLOW)Test database not running, starting it...$(RESET)"; \
 		$(MAKE) --no-print-directory test-db-up; \
 		$(MAKE) --no-print-directory test-db-migrate; \

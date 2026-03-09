@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gear_garage_test_db
+    container_name: summit_spec_test_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-simontarrant}
@@ -23,4 +23,4 @@ services:
 
 volumes:
   postgres_test_data:
-    name: gear_garage_test_postgres_data
+    name: summit_spec_test_postgres_data
