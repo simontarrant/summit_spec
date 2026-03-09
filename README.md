@@ -49,7 +49,7 @@ Terraform outputs the DB host.
 Construct connection string:
 
 ```text
-postgres://USER:PASSWORD@HOST:5432/gear_garage
+postgres://USER:PASSWORD@HOST:5432/summit_spec
 ```
 
 ## Deployment Workflow
@@ -71,7 +71,7 @@ terraform output db_host
 Construct connection string:
 
 ```text
-postgres://postgres:PASSWORD@HOST:5432/gear_garage
+postgres://postgres:PASSWORD@HOST:5432/summit_spec
 ```
 
 Add to Vercel:

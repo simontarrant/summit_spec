@@ -73,10 +73,10 @@ docker-reset:
 	@echo "Stopping containers and removing everything..."
 	docker compose down -v --remove-orphans
 	@echo "Removing Docker image..."
-	@docker rmi gear_garage_db-postgres 2>/dev/null || true
+	@docker rmi summit_spec_db-postgres 2>/dev/null || true
 	@docker rmi db-postgres 2>/dev/null || true
 	@echo "Removing named volume..."
-	@docker volume rm gear_garage_postgres_data 2>/dev/null || true
+	@docker volume rm summit_spec_postgres_data 2>/dev/null || true
 	@echo "Pruning all unused volumes..."
 	@docker volume prune -f
 	@echo "✓ Database completely destroyed"
@@ -84,8 +84,8 @@ docker-reset:
 docker-nuke:
 	@echo "☢️  NUCLEAR OPTION: Destroying database without confirmation..."
 	@docker compose down -v --remove-orphans 2>/dev/null || true
-	@docker rmi gear_garage_db-postgres 2>/dev/null || true
-	@docker volume prune -f --filter label=com.docker.compose.project=gear_garage_db 2>/dev/null || true
+	@docker rmi summit_spec_db-postgres 2>/dev/null || true
+	@docker volume prune -f --filter label=com.docker.compose.project=summit_spec_db 2>/dev/null || true
 	@echo "✓ Database nuked"
 
 # Migration commands
@@ -160,14 +160,14 @@ reset: docker-reset
 	@echo "  Connection: $(DATABASE_URL)"
 
 # Test database commands
-TEST_DATABASE_URL ?= postgresql://simontarrant:password@localhost:5433/gear_garage_test?sslmode=disable
+TEST_DATABASE_URL ?= postgresql://simontarrant:password@localhost:5433/summit_spec_test?sslmode=disable
 
 test-docker-up:
 	@echo "Starting test PostgreSQL container..."
 	docker compose -f docker-compose.test.yml up -d --build
 	@echo "Waiting for test PostgreSQL to be ready..."
 	@sleep 3
-	@docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U $(POSTGRES_USER) -d gear_garage_test || (sleep 2 && docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U $(POSTGRES_USER) -d gear_garage_test)
+	@docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U $(POSTGRES_USER) -d summit_spec_test || (sleep 2 && docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U $(POSTGRES_USER) -d summit_spec_test)
 	@echo "✓ Test PostgreSQL is ready"
 
 test-docker-down:
@@ -194,8 +194,8 @@ status:
 	@echo ""
 	@echo "Docker Status:"
 	@docker ps --filter name=summit_spec_db --format "  Container: {{.Names}} ({{.Status}})" 2>/dev/null || echo "  Container: Not running"
-	@docker images --filter reference=gear_garage_db-postgres --format "  Image: {{.Repository}}:{{.Tag}} ({{.Size}})" 2>/dev/null || echo "  Image: Not built"
-	@docker volume ls --filter name=gear_garage_postgres_data --format "  Volume: {{.Name}}" 2>/dev/null || echo "  Volume: Not created"
+	@docker images --filter reference=summit_spec_db-postgres --format "  Image: {{.Repository}}:{{.Tag}} ({{.Size}})" 2>/dev/null || echo "  Image: Not built"
+	@docker volume ls --filter name=summit_spec_postgres_data --format "  Volume: {{.Name}}" 2>/dev/null || echo "  Volume: Not created"
 	@echo ""
 	@if docker ps --filter name=summit_spec_db --format "{{.Names}}" | grep -q summit_spec_db; then \
 		echo "Database Connection:"; \

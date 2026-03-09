@@ -78,7 +78,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.0.0"
 
-  name = "gear-garage-vpc"
+  name = "summit-spec-vpc"
   cidr = "10.0.0.0/16"
 
   azs             = ["ap-southeast-2a", "ap-southeast-2b"]
@@ -92,7 +92,7 @@ module "vpc" {
 ############################
 
 resource "aws_security_group" "db" {
-  name   = "gear-garage-db-sg"
+  name   = "summit-spec-db-sg"
   vpc_id = module.vpc.vpc_id
 
   ingress {
@@ -117,7 +117,7 @@ resource "aws_security_group" "db" {
 ############################
 
 resource "aws_db_subnet_group" "db_subnets" {
-  name       = "gear-garage-subnets"
+  name       = "summit-spec-subnets"
   subnet_ids = module.vpc.public_subnets
 }
 
@@ -127,7 +127,7 @@ resource "aws_db_subnet_group" "db_subnets" {
 
 resource "aws_db_instance" "postgres" {
 
-  identifier = "gear-garage-db"
+  identifier = "summit-spec-db"
 
   engine         = "postgres"
   engine_version = "16"
@@ -136,7 +136,7 @@ resource "aws_db_instance" "postgres" {
 
   allocated_storage = 20
 
-  db_name  = "gear_garage"
+  db_name  = "summit_spec"
   username = var.db_user
   password = var.db_password
 
@@ -205,7 +205,7 @@ Create:
 ```
 
 ```
-DATABASE_URL=postgres://postgres:PASSWORD@HOST:5432/gear_garage
+DATABASE_URL=postgres://postgres:PASSWORD@HOST:5432/summit_spec
 ```
 
 ---
@@ -252,7 +252,7 @@ Terraform outputs the DB host.
 Construct connection string:
 
 ```
-postgres://USER:PASSWORD@HOST:5432/gear_garage
+postgres://USER:PASSWORD@HOST:5432/summit_spec
 ```
 
 ---
@@ -283,7 +283,7 @@ terraform output db_host
 ### Construct connection string
 
 ```
-postgres://postgres:PASSWORD@HOST:5432/gear_garage
+postgres://postgres:PASSWORD@HOST:5432/summit_spec
 ```
 
 ---
