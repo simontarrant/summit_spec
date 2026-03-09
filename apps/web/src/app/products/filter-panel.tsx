@@ -29,6 +29,8 @@ function unitLabel(unit: string): string {
   }
 }
 
+const TYPE_ORDER: AttributeDef["type"][] = ["number", "enum_list", "bool", "string"];
+
 export function FilterPanel({
   attributes,
   filterState,
@@ -36,15 +38,25 @@ export function FilterPanel({
 }: FilterPanelProps) {
   if (attributes.length === 0) return null;
 
+  // Group attributes by type, maintaining within-group priority order
+  const groups = TYPE_ORDER.map((type) => ({
+    type,
+    attrs: attributes.filter((a) => a.type === type),
+  })).filter((g) => g.attrs.length > 0);
+
   return (
-    <div className="flex flex-wrap items-end gap-4">
-      {attributes.map((attr) => (
-        <FilterControl
-          key={attr.id}
-          attribute={attr}
-          value={filterState[attr.id] ?? null}
-          onChange={(val) => onChange(attr.id, val)}
-        />
+    <div className="flex flex-col gap-3">
+      {groups.map((group, i) => (
+        <div key={group.type} className={cn("flex flex-wrap items-end gap-4", i > 0 && "pt-3 border-t border-slate-200")}>
+          {group.attrs.map((attr) => (
+            <FilterControl
+              key={attr.id}
+              attribute={attr}
+              value={filterState[attr.id] ?? null}
+              onChange={(val) => onChange(attr.id, val)}
+            />
+          ))}
+        </div>
       ))}
     </div>
   );

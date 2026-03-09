@@ -10,7 +10,15 @@
 
 - filters should be grouped by attirbute type, horizontally. within a group, the order should follow the same priority described in @docs/feature/product_search_table.md for displaying attributes in the actual product table
 
-- come up with a sensible ordering of the types and update this doc with the final decision
+**Type ordering (decided):** `number` → `enum_list` → `bool` → `string`
+
+Rationale:
+- `number`: range inputs are the most analytical and widely used filter; shown first
+- `enum_list`: categorical dropdowns are the next most common filter
+- `bool`: simple yes/no toggles; less common
+- `string`: exact-match inputs are the least common and most narrow; shown last
+
+Within each group, attributes follow the same column priority: filtered attributes first, then ancestor category attributes (root-first), then selected category attributes, then descendant category attributes; within each category ordered by attribute priority then attribute id.
 
 # Task 3: collapsing filters
 
