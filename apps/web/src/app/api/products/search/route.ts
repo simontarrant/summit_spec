@@ -82,6 +82,13 @@ interface CountRow {
   count: bigint;
 }
 
+interface EnumAttributeValue {
+  id: bigint | number;
+  slug: string;
+  name: string;
+  display_order: number;
+}
+
 // --- Helpers ---
 
 function err400(message: string) {
@@ -218,7 +225,8 @@ export async function POST(req: Request) {
 
       if (!attrMap.has(attrIdStr)) {
         const rel = ca.attribute_rel;
-        const enumVals = rel.enum_attribute_vals_enum_attribute_vals_attributeToattribute;
+        const enumVals: EnumAttributeValue[] =
+          rel.enum_attribute_vals_enum_attribute_vals_attributeToattribute;
         attrMap.set(attrIdStr, {
           id: rel.id,
           slug: rel.slug,
@@ -230,7 +238,7 @@ export async function POST(req: Request) {
           categoryAttributeId: ca.id,
           enumOptions:
             rel.type === "enum_list"
-              ? enumVals.map((v) => ({
+              ? enumVals.map((v: EnumAttributeValue) => ({
                   id: v.id.toString(),
                   slug: v.slug,
                   name: v.name,
