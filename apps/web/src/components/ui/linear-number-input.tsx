@@ -23,8 +23,8 @@ export function LinearNumberInput({
       return;
     }
 
-    // allow valid numeric patterns
-    if (/^[0-9]*\.?[0-9]*$/.test(v)) {
+    // allow valid numeric patterns (including negatives)
+    if (/^-?(?:\d+\.?\d*|\.\d*)?$/.test(v)) {
       onChange(e);
     }
   };

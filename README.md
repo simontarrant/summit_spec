@@ -29,3 +29,70 @@ Login with the seeded user:
     },
   ]
 ```
+
+## Infrastructure
+
+Terraform provisions AWS RDS.
+This setup is intended for the single online `prod` environment in `ap-southeast-2`.
+Use local Postgres on your machine for `dev`/`local` by setting `DATABASE_URL` accordingly.
+
+Setup:
+
+```bash
+cd infra
+terraform init
+terraform apply
+```
+
+Terraform outputs the DB host.
+
+Construct connection string:
+
+```text
+postgres://USER:PASSWORD@HOST:5432/gear_garage
+```
+
+## Deployment Workflow
+
+Provision infrastructure:
+
+```bash
+cd infra
+terraform init
+terraform apply
+```
+
+Get database endpoint:
+
+```bash
+terraform output db_host
+```
+
+Construct connection string:
+
+```text
+postgres://postgres:PASSWORD@HOST:5432/gear_garage
+```
+
+Add to Vercel:
+
+```text
+Project Settings -> Environment Variables
+DATABASE_URL=<connection string>
+```
+
+Deploy app by pushing to GitHub so Vercel auto-deploys.
+
+## Migration Workflow
+
+Continue using Goose:
+
+```bash
+make db-migrate
+```
+
+or:
+
+```bash
+goose postgres $DATABASE_URL up
+```
