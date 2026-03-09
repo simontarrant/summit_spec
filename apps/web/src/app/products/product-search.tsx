@@ -435,14 +435,14 @@ export function ProductSearch() {
   // --- Render ---
 
   const filterBar = schema ? (
-    <div className="flex items-center gap-4 flex-wrap">
-      <CategorySelector
-        categories={schema.categories}
-        value={categoryId}
-        onChange={handleCategoryChange}
-      />
-      {categoryId && (
-        <>
+    <div className="product-search-controls">
+      <div className="product-search-controls-row">
+        <CategorySelector
+          categories={schema.categories}
+          value={categoryId}
+          onChange={handleCategoryChange}
+        />
+        {categoryId && (
           <button
             type="button"
             className="ui-button-primary text-sm px-3 py-1.5"
@@ -452,19 +452,21 @@ export function ProductSearch() {
           >
             {filtersCollapsed ? "Show Filters" : "Hide Filters"}
           </button>
-          {!filtersCollapsed && (
-            <>
-              <div className="w-px h-6 bg-grey-200" />
-              <div id="product-filter-controls">
-                <FilterPanel
-                  attributes={resolvedAttributes}
-                  filterState={filterState}
-                  onChange={handleFilterChange}
-                />
-              </div>
-            </>
-          )}
-        </>
+        )}
+      </div>
+      {categoryId && !filtersCollapsed && (
+        <section
+          id="product-filter-controls"
+          className="product-filter-section"
+          aria-label="Filters"
+        >
+          <div className="product-section-label">Filters</div>
+          <FilterPanel
+            attributes={resolvedAttributes}
+            filterState={filterState}
+            onChange={handleFilterChange}
+          />
+        </section>
       )}
     </div>
   ) : null;
@@ -510,6 +512,7 @@ export function ProductSearch() {
             </p>
           ) : (
             <>
+              <div className="product-table-section-marker">Product Table</div>
               {searchError && (
                 <div className="bg-warning/10 text-warning px-4 py-2 rounded mb-4 text-sm">
                   {searchError}
