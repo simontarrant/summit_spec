@@ -8,6 +8,13 @@ interface CategoryNode {
   children: CategoryNode[];
 }
 
+interface EnumAttributeValue {
+  id: bigint | number;
+  slug: string;
+  name: string;
+  display_order: number;
+}
+
 export async function GET() {
   try {
     const [categories, categoryAttributes] = await Promise.all([
@@ -82,7 +89,7 @@ export async function GET() {
       // Dedupe attributes
       if (!attributesMap[attrId]) {
         const rel = ca.attribute_rel;
-        const enumVals =
+        const enumVals: EnumAttributeValue[] =
           rel.enum_attribute_vals_enum_attribute_vals_attributeToattribute;
         attributesMap[attrId] = {
           id: attrId,
