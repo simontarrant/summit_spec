@@ -13,6 +13,7 @@ export default function Page() {
       <section className="ui-card">
         <p className="ui-label">System overview</p>
         <h1>Hiking Gear UI — Theme Test</h1>
+        <p className="mono text-sm text-slate">Redeploy marker: example-page-refresh-2026-03-10</p>
         <p>
           This page demonstrates the visual system defined in <code>globals.css</code> and THEME.md.
           Everything below uses the theme tokens, colors, spacing, and shape language.
