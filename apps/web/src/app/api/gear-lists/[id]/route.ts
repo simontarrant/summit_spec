@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const preferredRegion = "syd1";
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

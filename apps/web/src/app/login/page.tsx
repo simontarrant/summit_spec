@@ -1,5 +1,7 @@
 "use client";
 
+export const preferredRegion = "syd1";
+
 import { useState, useRef, useLayoutEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";

@@ -1,5 +1,7 @@
 import { AppShell } from "@/components/ui/app_shell";
 
+export const preferredRegion = "syd1";
+
 const tabs = [
   { label: "Example", href: "/example" },
   { label: "Products", href: "/products" },

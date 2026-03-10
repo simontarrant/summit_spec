@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const preferredRegion = "syd1";
+
 export async function GET() {
   // Database removed - return empty gear lists array
   return NextResponse.json({ gearLists: [] }, { status: 200 });

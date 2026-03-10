@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+export const preferredRegion = "syd1";
+
 interface CategoryNode {
   id: string;
   slug: string;

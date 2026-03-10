@@ -6,6 +6,8 @@ import { Page } from "@/components/ui/page";
 import { Card, SectionLabel } from "@/components/ui/card";
 import { PrimaryButton } from "@/components/ui/button";
 
+export const preferredRegion = "syd1";
+
 interface SleepingPadDetail {
   sleeping_pad_r_value: number | null;
 }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const preferredRegion = "syd1";
+
 export async function GET() {
   // Database removed - return empty products array
   return NextResponse.json({ products: [] }, { status: 200 });
