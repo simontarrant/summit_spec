@@ -277,6 +277,7 @@ export function ProductSearch() {
     return resolveAttributes(schema, categoryId);
   }, [schema, categoryId]);
 
+
   const hasActiveFilters = useMemo(() => {
     if (!schema) return false;
     return buildApiFilters(filterState, schema.attributes).length > 0;
@@ -466,37 +467,37 @@ export function ProductSearch() {
 
   // --- Render ---
 
-  const filterBar = schema ? (
+  const categorySelector = schema ? (
+    <CategorySelector
+      categories={schema.categories}
+      value={categoryId}
+      onChange={handleCategoryChange}
+      variant="title"
+    />
+  ) : null;
+
+  const filterBar = schema && categoryId ? (
     <div className="product-search-controls">
       <div className="product-search-controls-row">
-        <CategorySelector
-          categories={schema.categories}
-          value={categoryId}
-          onChange={handleCategoryChange}
-        />
-        {categoryId && (
-          <>
-            <button
-              type="button"
-              className="ui-button-primary text-sm px-3 py-1.5"
-              aria-expanded={!filtersCollapsed}
-              aria-controls="product-filter-controls"
-              onClick={() => setFiltersCollapsed((prev) => !prev)}
-            >
-              {filtersCollapsed ? "Show Filters" : "Hide Filters"}
-            </button>
-            <button
-              type="button"
-              className="ui-button-accent text-sm px-3 py-1.5"
-              onClick={handleClearFilters}
-              disabled={!hasActiveFilters}
-            >
-              Clear Filters
-            </button>
-          </>
-        )}
+        <button
+          type="button"
+          className="ui-button-primary text-sm px-3 py-1.5"
+          aria-expanded={!filtersCollapsed}
+          aria-controls="product-filter-controls"
+          onClick={() => setFiltersCollapsed((prev) => !prev)}
+        >
+          {filtersCollapsed ? "Show Filters" : "Hide Filters"}
+        </button>
+        <button
+          type="button"
+          className="ui-button-accent text-sm px-3 py-1.5"
+          onClick={handleClearFilters}
+          disabled={!hasActiveFilters}
+        >
+          Clear Filters
+        </button>
       </div>
-      {categoryId && !filtersCollapsed && (
+      {!filtersCollapsed && (
         <section
           id="product-filter-controls"
           className="product-filter-section"
@@ -543,7 +544,8 @@ export function ProductSearch() {
     <AppShell
       tabs={tabs}
       pageTitle="Product Catalog"
-      pageDescription="Browse and compare hiking gear across categories"
+      pageDescription="Browse and compare hiking gear"
+      titleAddon={categorySelector}
       filterBar={filterBar}
     >
       <div className="ui-page">

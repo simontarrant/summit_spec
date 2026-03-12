@@ -18,6 +18,7 @@ interface AppShellProps {
   tabs?: Tab[];
   pageTitle?: string;
   pageDescription?: string;
+  titleAddon?: React.ReactNode;
   filterBar?: React.ReactNode;
 }
 
@@ -26,6 +27,7 @@ export function AppShell({
   tabs,
   pageTitle,
   pageDescription,
+  titleAddon,
   filterBar
 }: AppShellProps) {
   return (
@@ -35,7 +37,15 @@ export function AppShell({
       <div className="ui-content-container">
         {(pageTitle || pageDescription) && (
           <div className="ui-page-header">
-            {pageTitle && <h1 className="ui-page-title">{pageTitle}</h1>}
+            <div className="ui-page-header-top">
+              {pageTitle && <h1 className="ui-page-title">{pageTitle}</h1>}
+              {titleAddon && (
+                <>
+                  <span className="ui-page-title-sep">|</span>
+                  <div className="ui-page-title-addon">{titleAddon}</div>
+                </>
+              )}
+            </div>
             {pageDescription && <p className="ui-page-description">{pageDescription}</p>}
           </div>
         )}
