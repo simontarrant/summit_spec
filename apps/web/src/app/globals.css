@@ -447,6 +447,11 @@
     width: 260px;
   }
 
+  .product-table-text-col {
+    max-width: 200px;
+    overflow: hidden;
+  }
+
   .product-link {
     color: var(--color-text-primary);
     font-weight: 500;

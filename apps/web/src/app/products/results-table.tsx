@@ -28,17 +28,17 @@ function renderCellValue(
 ): React.ReactNode {
   if (column.key === "productName") {
     return (
-      <span className="flex flex-col leading-tight">
-        <span className="font-medium text-charcoal">{row.productName}</span>
+      <span className="flex flex-col leading-tight overflow-hidden min-w-0">
+        <span className="font-medium text-charcoal truncate" title={row.productName}>{row.productName}</span>
         {row.variantName && (
-          <span className="text-xs" style={{ color: "var(--color-accent-alpine)" }}>{row.variantName}</span>
+          <span className="text-xs truncate" style={{ color: "var(--color-accent-alpine)" }} title={row.variantName}>{row.variantName}</span>
         )}
       </span>
     );
   }
 
   if (column.key === "brandName") {
-    return <span className="text-slate">{row.brandName}</span>;
+    return <span className="text-slate truncate block" title={row.brandName}>{row.brandName}</span>;
   }
 
   const attrId = column.attributeId;
@@ -62,8 +62,10 @@ function renderCellValue(
       const enumVal = attr.value as { id: string; slug: string; name: string };
       return enumVal.name;
     }
-    case "string":
-      return attr.value as string;
+    case "string": {
+      const strVal = attr.value as string;
+      return <span className="truncate block" title={strVal}>{strVal}</span>;
+    }
     default:
       return String(attr.value);
   }
@@ -131,7 +133,7 @@ export function ResultsTable({
             rows.map((row) => (
               <tr key={row.variantId}>
                 {columns.map((col) => (
-                  <td key={col.key} className={cn(col.numberUnit != null && "text-right", col.key === "productName" && "product-table-name-col")}>{renderCellValue(row, col)}</td>
+                  <td key={col.key} className={cn(col.numberUnit != null && "text-right", col.key === "productName" && "product-table-name-col", (col.key === "brandName" || col.type === "string") && "product-table-text-col")}>{renderCellValue(row, col)}</td>
                 ))}
               </tr>
             ))
