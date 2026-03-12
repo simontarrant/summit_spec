@@ -31,10 +31,10 @@ function unitLabel(unit: string): string {
 
 const TYPE_ORDER: AttributeDef["type"][] = ["number", "enum_list", "bool", "string"];
 const TYPE_LABEL: Record<AttributeDef["type"], string> = {
-  number: "Number Filters",
-  enum_list: "Enum Filters",
-  bool: "Boolean Filters",
-  string: "String Filters",
+  number: "Range Filters",
+  enum_list: "Attributes",
+  bool: "Features",
+  string: "Search",
 };
 
 export function FilterPanel({
