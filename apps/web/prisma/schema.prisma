@@ -174,6 +174,31 @@ model product_variant_attribute_value {
   product_variant_product_variant_attribute_value_product_variantToproduct_variant product_variant      @relation("product_variant_attribute_value_product_variantToproduct_variant", fields: [product_variant], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+model search_product_variant {
+  variant_id          BigInt   @id
+  product_id          BigInt
+  product_name        String
+  variant_name        String?
+  brand_id            BigInt
+  brand_name          String
+  primary_category_id BigInt
+  category_ids        BigInt[]
+  number_attrs        Json     @default("{}")
+  bool_attrs          Json     @default("{}")
+  enum_attrs          Json     @default("{}")
+  string_attrs        Json     @default("{}")
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([bool_attrs], map: "idx_spv_bool_attrs", type: Gin)
+  @@index([brand_name], map: "idx_spv_brand_name")
+  @@index([category_ids], map: "idx_spv_category_ids", type: Gin)
+  @@index([enum_attrs], map: "idx_spv_enum_attrs", type: Gin)
+  @@index([number_attrs], map: "idx_spv_number_attrs", type: Gin)
+  @@index([product_id], map: "idx_spv_product_id")
+  @@index([product_name], map: "idx_spv_product_name")
+  @@index([string_attrs], map: "idx_spv_string_attrs", type: Gin)
+}
+
 enum attribute_type {
   number
   bool

@@ -143,7 +143,7 @@
     width: 26px;
     height: 26px;
     border-radius: 4px;
-    background: var(--color-accent-alpine);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -75,7 +75,9 @@ function Topbar() {
   return (
     <header className="ui-topbar">
       <div className="ui-topbar-left">
-        <div className="ui-logo-mark">⛰️</div>
+        <div className="ui-logo-mark">
+          <img src="/logo-dark.svg" width="32" height="32" alt="Summit Spec logo" />
+        </div>
         <div className="ui-logo-text">Summit Spec</div>
       </div>
       <div className="ui-topbar-right">

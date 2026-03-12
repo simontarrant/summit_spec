@@ -25,6 +25,9 @@ const jetbrains = JetBrains_Mono({
 export const metadata = {
   title: "Hiking Gear",
   description: "Manage your gear lists and track your hiking equipment",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
