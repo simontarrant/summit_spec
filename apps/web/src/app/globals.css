@@ -723,3 +723,14 @@
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 }
+
+.skeleton-pulse {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-elevated) 25%,
+    color-mix(in srgb, var(--color-bg-elevated) 60%, var(--color-slate) 40%) 50%,
+    var(--color-bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}

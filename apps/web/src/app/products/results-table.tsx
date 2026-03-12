@@ -121,8 +121,28 @@ export function ResultsTable({
             })}
           </tr>
         </thead>
-        <tbody className={cn(loading && "opacity-40 pointer-events-none")}>
-          {rows.length === 0 && !loading ? (
+        <tbody className={cn(loading && rows.length > 0 && "opacity-40 pointer-events-none")}>
+          {rows.length === 0 && loading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <tr key={i}>
+                {columns.length > 0 ? (
+                  columns.map((col) => (
+                    <td key={col.key}>
+                      <div className="skeleton-pulse h-4 rounded" style={{ width: col.key === "productName" ? "80%" : col.numberUnit ? "60%" : "70%", opacity: 1 - i * 0.08 }} />
+                    </td>
+                  ))
+                ) : (
+                  <>
+                    <td><div className="skeleton-pulse h-4 rounded" style={{ width: "70%" }} /></td>
+                    <td><div className="skeleton-pulse h-4 rounded" style={{ width: "50%" }} /></td>
+                    <td><div className="skeleton-pulse h-4 rounded" style={{ width: "40%" }} /></td>
+                    <td><div className="skeleton-pulse h-4 rounded" style={{ width: "55%" }} /></td>
+                    <td><div className="skeleton-pulse h-4 rounded" style={{ width: "45%" }} /></td>
+                  </>
+                )}
+              </tr>
+            ))
+          ) : rows.length === 0 && !loading ? (
             <tr>
               <td
                 colSpan={columns.length}
