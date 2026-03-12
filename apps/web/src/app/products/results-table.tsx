@@ -79,7 +79,7 @@ export function ResultsTable({
   loading,
 }: ResultsTableProps) {
   return (
-    <div className="overflow-x-auto">
+    <div className="product-table-scroll-wrapper">
       <table className="product-table">
         <thead>
           <tr>
