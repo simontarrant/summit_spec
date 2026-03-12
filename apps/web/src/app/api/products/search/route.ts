@@ -686,7 +686,7 @@ export async function POST(req: Request) {
       .filter((ca) => selectedAndAncestorCategoryIds.has(ca.categoryId))
       .sort(
         (a, b) =>
-          a.priority - b.priority ||
+          b.priority - a.priority ||
           compareBigInt(a.attributeId, b.attributeId) ||
           compareBigInt(a.categoryId, b.categoryId) ||
           compareBigInt(a.catAttrId, b.catAttrId)
@@ -711,7 +711,7 @@ export async function POST(req: Request) {
         .filter((ca) => ca.categoryId === childId)
         .sort(
           (a, b) =>
-            a.priority - b.priority ||
+            b.priority - a.priority ||
             compareBigInt(a.attributeId, b.attributeId) ||
             compareBigInt(a.catAttrId, b.catAttrId)
         );

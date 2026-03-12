@@ -4,8 +4,8 @@ export
 
 .PHONY: help docker-up docker-down docker-restart docker-logs docker-reset docker-nuke \
         migrate-up migrate-down migrate-status migrate-reset \
-        seed generate verify clean \
-        setup reset status \
+        seed seed-canonical generate verify clean \
+        setup reset reset-canonical status \
         test-docker-up test-docker-down test-migrate-up
 
 # Default target
@@ -119,6 +119,15 @@ seed: check-env
 	fi
 	@echo "✓ Database seeded"
 
+seed-canonical: check-env
+	@echo "Seeding database with canonical data..."
+	@if [ -f "scripts/seed_sleeping_pads_canonical.sql" ]; then \
+		psql "$(DATABASE_URL)" -f scripts/seed_sleeping_pads_canonical.sql; \
+	else \
+		echo "Warning: Canonical seed script not found at scripts/seed_sleeping_pads_canonical.sql"; \
+	fi
+	@echo "✓ Canonical data seeded"
+
 # Code generation
 generate:
 	@echo "Generating Go code from SQL queries..."
@@ -153,10 +162,25 @@ reset: docker-reset
 	@sleep 2
 	@$(MAKE) migrate-up
 	@$(MAKE) seed
+	@$(MAKE) seed-canonical
 	@echo "Rebuilding search index..."
 	@psql "$(DATABASE_URL)" -f queries/search/rebuild_product_search_index.sql
 	@echo "✓ Search index rebuilt"
 	@echo "✓ Database reset and setup complete!"
+	@echo "  Connection: $(DATABASE_URL)"
+
+reset-canonical: docker-reset
+	@echo "Waiting for volume cleanup..."
+	@sleep 2
+	@$(MAKE) docker-up
+	@echo "Waiting for database to be ready..."
+	@sleep 2
+	@$(MAKE) migrate-up
+	@$(MAKE) seed-canonical
+	@echo "Rebuilding search index..."
+	@psql "$(DATABASE_URL)" -f queries/search/rebuild_product_search_index.sql
+	@echo "✓ Search index rebuilt"
+	@echo "✓ Database reset with canonical data complete!"
 	@echo "  Connection: $(DATABASE_URL)"
 
 # Test database commands

@@ -81,7 +81,7 @@ function resolveAttributes(
     )
     .sort(
       (a, b) =>
-        a.priority - b.priority ||
+        b.priority - a.priority ||
         a.attributeId.localeCompare(b.attributeId) ||
         a.categoryId.localeCompare(b.categoryId)
     );
@@ -99,7 +99,7 @@ function resolveAttributes(
 
   for (const catId of sortedDescendantIds) {
     const sortedEntries = [...(schema.categoryAttributes[catId] ?? [])].sort(
-      (a, b) => a.priority - b.priority || a.attributeId.localeCompare(b.attributeId)
+      (a, b) => b.priority - a.priority || a.attributeId.localeCompare(b.attributeId)
     );
     for (const entry of sortedEntries) {
       if (seen.has(entry.attributeId)) continue;

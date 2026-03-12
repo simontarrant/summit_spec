@@ -1,5 +1,5 @@
 .PHONY: help setup dev clean install \
-        db-up db-down db-reset db-migrate db-seed \
+        db-up db-down db-reset db-reset-canonical db-migrate db-seed db-seed-canonical \
         web-dev web-build web-start web-clean \
         prisma-pull prisma-generate prisma-studio \
         dev-all stop-all \
@@ -32,8 +32,10 @@ help:
 	@echo "  make db-up              - Start PostgreSQL container"
 	@echo "  make db-down            - Stop PostgreSQL container"
 	@echo "  make db-reset           - Reset database (destructive!)"
+	@echo "  make db-reset-canonical - Reset database and seed with canonical data only (destructive!)"
 	@echo "  make db-migrate         - Run database migrations"
 	@echo "  make db-seed            - Seed database with sample data"
+	@echo "  make db-seed-canonical  - Seed database with canonical product data"
 	@echo ""
 	@echo "$(GREEN)Web Commands (Next.js):$(RESET)"
 	@echo "  make web-dev            - Run Next.js dev server"
@@ -101,9 +103,17 @@ db-migrate:
 	@echo "$(CYAN)Running migrations...$(RESET)"
 	@cd db && $(MAKE) migrate-up
 
+db-reset-canonical:
+	@echo "$(RED)Resetting database with canonical data...$(RESET)"
+	@cd db && $(MAKE) reset-canonical
+
 db-seed:
 	@echo "$(CYAN)Seeding database...$(RESET)"
 	@cd db && $(MAKE) seed
+
+db-seed-canonical:
+	@echo "$(CYAN)Seeding database with canonical data...$(RESET)"
+	@cd db && $(MAKE) seed-canonical
 
 db-logs:
 	@cd db && $(MAKE) docker-logs
