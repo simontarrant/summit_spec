@@ -556,7 +556,6 @@ export function ProductSearch() {
             </p>
           ) : (
             <>
-              <div className="product-table-section-marker">Product Table</div>
               {searchError && (
                 <div className="bg-warning/10 text-warning px-4 py-2 rounded mb-4 text-sm">
                   {searchError}

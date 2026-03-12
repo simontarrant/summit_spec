@@ -12,11 +12,11 @@ interface ResultsTableProps {
 function formatNumberValue(value: number, unit: string | null | undefined): string {
   switch (unit) {
     case "weight_g":
-      return `${value}g`;
+      return `${value} g`;
     case "length_mm":
-      return `${value}mm`;
+      return `${value} mm`;
     case "volume_ml":
-      return `${value}ml`;
+      return `${value} ml`;
     default:
       return String(value);
   }
@@ -52,7 +52,7 @@ function renderCellValue(
   switch (attr.type) {
     case "number":
       return (
-        <span className="mono">
+        <span className="font-mono text-sm tabular-nums">
           {formatNumberValue(attr.value as number, column.numberUnit)}
         </span>
       );
@@ -86,14 +86,16 @@ export function ResultsTable({
               const isActive =
                 sort && col.attributeId && sort.attributeId === col.attributeId;
 
+              const isNumeric = col.numberUnit != null;
+
               if (isSortable) {
                 return (
                   <th
                     key={col.key}
                     onClick={() => onSort(col.attributeId!)}
-                    className="sortable-header"
+                    className={cn("sortable-header", isNumeric && "text-right")}
                   >
-                    <div className="flex items-center gap-1.5">
+                    <div className={cn("flex items-center gap-1.5", isNumeric && "justify-end")}>
                       {col.label}
                       <span className="sort-indicator">
                         {isActive ? (
@@ -111,7 +113,7 @@ export function ResultsTable({
                 );
               }
 
-              return <th key={col.key}>{col.label}</th>;
+              return <th key={col.key} className={cn(isNumeric && "text-right")}>{col.label}</th>;
             })}
           </tr>
         </thead>
@@ -129,7 +131,7 @@ export function ResultsTable({
             rows.map((row) => (
               <tr key={row.variantId}>
                 {columns.map((col) => (
-                  <td key={col.key}>{renderCellValue(row, col)}</td>
+                  <td key={col.key} className={cn(col.numberUnit != null && "text-right")}>{renderCellValue(row, col)}</td>
                 ))}
               </tr>
             ))

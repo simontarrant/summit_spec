@@ -142,16 +142,6 @@ Right aligned.
 
 This is more technical and less UI clutter.
 
-6. Numeric Alignment (Important)
-
-Numbers should be right aligned.
-
-Example:
-
-Weight      460 g
-Length      1830 mm
-Width       550 mm
-
 Right aligned columns make scanning dramatically easier.
 
 7. Filter Toggle UX
@@ -170,14 +160,3 @@ Make filters a collapsible panel:
 Filters ▼
 
 Much cleaner.
-
-8.  Add Table Density Option (Power Users Love This)
-
-Add toggle:
-
-Density:
-Comfortable | Compact
-
-Compact mode reduces row height.
-
-Power users will love this.
