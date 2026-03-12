@@ -37,17 +37,22 @@ export function Modal({ isOpen, onClose, children, className }: ModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-white/70 cursor-pointer"
+        className="absolute inset-0 cursor-pointer"
+        style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(2px)" }}
         onClick={onClose}
       />
 
       {/* Modal content */}
       <div
         className={cn(
-          "relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4",
+          "relative rounded-lg max-w-md w-full mx-4",
           className
         )}
-        style={{ border: "1px solid var(--color-grey-200)" }}
+        style={{
+          background: "var(--color-bg-surface)",
+          border: "1px solid var(--color-border-strong)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+        }}
       >
         {children}
       </div>
