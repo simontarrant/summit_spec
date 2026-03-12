@@ -179,3 +179,837 @@ WHERE c.slug = 'sleeping-pads'
       AND ca.attribute = a.id
       AND ca.is_deleted = FALSE
   );
+
+-- ─────────────────────────────────────────
+-- EXAMPLE DATA
+-- ─────────────────────────────────────────
+
+-- Helper functions (idempotent)
+CREATE OR REPLACE FUNCTION sp_attr(attr_slug TEXT) RETURNS BIGINT AS $$
+  SELECT ca.id FROM category_attribute ca
+  JOIN category c ON c.id = ca.category
+  JOIN attribute a ON a.id = ca.attribute
+  WHERE c.slug = 'sleeping-pads' AND a.slug = attr_slug
+    AND ca.is_deleted = FALSE;
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION sp_enum(attr_slug TEXT, val_slug TEXT) RETURNS BIGINT AS $$
+  SELECT e.id FROM enum_attribute_vals e
+  JOIN attribute a ON a.id = e.attribute
+  WHERE a.slug = attr_slug AND e.slug = val_slug
+    AND e.is_deleted = FALSE;
+$$ LANGUAGE SQL;
+
+-- Brand
+INSERT INTO brand (slug, name, country)
+SELECT 'ex-gear', 'EX Gear', 'US'
+WHERE NOT EXISTS (SELECT 1 FROM brand WHERE slug = 'ex-gear' AND is_deleted = FALSE);
+
+-- ─────────────────────────────────────────
+-- [EX] AirFlite UL  (ultralight uninsulated air pad)
+-- ─────────────────────────────────────────
+
+INSERT INTO product (slug, name, brand, primary_category, visibility, release_at, release_precision)
+SELECT
+  'ex-airflite-ul', '[EX] AirFlite UL',
+  (SELECT id FROM brand WHERE slug = 'ex-gear'),
+  (SELECT id FROM category WHERE slug = 'sleeping-pads'),
+  'public', '2024-01-01', 'year'
+WHERE NOT EXISTS (
+  SELECT 1 FROM product p
+  JOIN brand b ON b.id = p.brand
+  WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND p.is_deleted = FALSE
+);
+
+INSERT INTO product_variant (product, slug, name, is_default)
+SELECT p.id, v.slug, v.name, v.is_default
+FROM product p
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  ('regular', 'Regular', TRUE),
+  ('long',    'Long',    FALSE)
+) AS v(slug, name, is_default) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND p.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant pv
+    WHERE pv.product = p.id AND pv.slug = v.slug AND pv.is_deleted = FALSE
+  );
+
+-- Regular variant attributes
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),          310.0),
+  (sp_attr('r_value'),             0.5),
+  (sp_attr('thickness_mm'),       60.0),
+  (sp_attr('length_mm'),        1830.0),
+  (sp_attr('width_mm'),          510.0),
+  (sp_attr('packed_volume_ml'),  510.0),
+  (sp_attr('packed_length_mm'),  230.0),
+  (sp_attr('packed_diameter_mm'), 90.0),
+  (sp_attr('baffle_count'),       25.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, bool_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('astm_tested'),       FALSE),
+  (sp_attr('pump_included'),     TRUE),
+  (sp_attr('integrated_pump'),   FALSE),
+  (sp_attr('included_stuff_sack'), TRUE),
+  (sp_attr('repair_kit_included'), TRUE)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),              sp_enum('pad_type', 'air-pad')),
+  (sp_attr('insulation_type'),       sp_enum('insulation_type', 'uninsulated')),
+  (sp_attr('shape'),                 sp_enum('shape', 'mummy')),
+  (sp_attr('intended_season_rating'),sp_enum('intended_season_rating', 'three-season')),
+  (sp_attr('size_class'),            sp_enum('size_class', 'regular')),
+  (sp_attr('sex_specific_design'),   sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, string_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('fabric_material_text'),    '20D ripstop nylon / TPU laminate'),
+  (sp_attr('top_fabric_denier_text'),  '20D'),
+  (sp_attr('bottom_fabric_denier_text'), '20D'),
+  (sp_attr('valve_type_text'),         'Dual flat valve')
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- Long variant attributes
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),          390.0),
+  (sp_attr('r_value'),             0.5),
+  (sp_attr('thickness_mm'),       60.0),
+  (sp_attr('length_mm'),        1960.0),
+  (sp_attr('width_mm'),          530.0),
+  (sp_attr('packed_volume_ml'),  640.0),
+  (sp_attr('packed_length_mm'),  250.0),
+  (sp_attr('packed_diameter_mm'), 95.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND pv.slug = 'long'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),              sp_enum('pad_type', 'air-pad')),
+  (sp_attr('insulation_type'),       sp_enum('insulation_type', 'uninsulated')),
+  (sp_attr('shape'),                 sp_enum('shape', 'mummy')),
+  (sp_attr('intended_season_rating'),sp_enum('intended_season_rating', 'three-season')),
+  (sp_attr('size_class'),            sp_enum('size_class', 'long')),
+  (sp_attr('sex_specific_design'),   sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-airflite-ul' AND pv.slug = 'long'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- ─────────────────────────────────────────
+-- [EX] WarmSleep Pro  (insulated winter air pad)
+-- ─────────────────────────────────────────
+
+INSERT INTO product (slug, name, brand, primary_category, visibility, release_at, release_precision)
+SELECT
+  'ex-warmsleep-pro', '[EX] WarmSleep Pro',
+  (SELECT id FROM brand WHERE slug = 'ex-gear'),
+  (SELECT id FROM category WHERE slug = 'sleeping-pads'),
+  'public', '2023-01-01', 'year'
+WHERE NOT EXISTS (
+  SELECT 1 FROM product p
+  JOIN brand b ON b.id = p.brand
+  WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND p.is_deleted = FALSE
+);
+
+INSERT INTO product_variant (product, slug, name, is_default)
+SELECT p.id, v.slug, v.name, v.is_default
+FROM product p
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  ('regular',       'Regular',       TRUE),
+  ('regular-wide',  'Regular Wide',  FALSE),
+  ('long',          'Long',          FALSE)
+) AS v(slug, name, is_default) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND p.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant pv
+    WHERE pv.product = p.id AND pv.slug = v.slug AND pv.is_deleted = FALSE
+  );
+
+-- Regular
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),           480.0),
+  (sp_attr('r_value'),              6.0),
+  (sp_attr('thickness_mm'),        100.0),
+  (sp_attr('length_mm'),          1830.0),
+  (sp_attr('width_mm'),            510.0),
+  (sp_attr('packed_volume_ml'),    890.0),
+  (sp_attr('packed_length_mm'),    250.0),
+  (sp_attr('packed_diameter_mm'),  100.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, bool_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('astm_tested'),         TRUE),
+  (sp_attr('pump_included'),       TRUE),
+  (sp_attr('integrated_pump'),     FALSE),
+  (sp_attr('included_stuff_sack'), TRUE),
+  (sp_attr('repair_kit_included'), TRUE)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'air-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'synthetic-insulation')),
+  (sp_attr('shape'),                  sp_enum('shape', 'mummy')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'winter')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'regular')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, string_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('fabric_material_text'),     '30D ripstop nylon / TPU'),
+  (sp_attr('top_fabric_denier_text'),   '30D'),
+  (sp_attr('bottom_fabric_denier_text'),'30D'),
+  (sp_attr('valve_type_text'),          'WingLock')
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- Regular Wide
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),           570.0),
+  (sp_attr('r_value'),              6.0),
+  (sp_attr('thickness_mm'),        100.0),
+  (sp_attr('length_mm'),          1830.0),
+  (sp_attr('width_mm'),            640.0),
+  (sp_attr('packed_volume_ml'),   1100.0),
+  (sp_attr('packed_length_mm'),    265.0),
+  (sp_attr('packed_diameter_mm'),  110.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'regular-wide'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'air-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'synthetic-insulation')),
+  (sp_attr('shape'),                  sp_enum('shape', 'rectangular')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'winter')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'regular-wide')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'regular-wide'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- Long
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),           590.0),
+  (sp_attr('r_value'),              6.0),
+  (sp_attr('thickness_mm'),        100.0),
+  (sp_attr('length_mm'),          1960.0),
+  (sp_attr('width_mm'),            510.0),
+  (sp_attr('packed_volume_ml'),   1050.0),
+  (sp_attr('packed_length_mm'),    265.0),
+  (sp_attr('packed_diameter_mm'),  105.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'long'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'air-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'synthetic-insulation')),
+  (sp_attr('shape'),                  sp_enum('shape', 'mummy')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'winter')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'long')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-warmsleep-pro' AND pv.slug = 'long'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- ─────────────────────────────────────────
+-- [EX] FoamLite Classic  (closed-cell foam)
+-- ─────────────────────────────────────────
+
+INSERT INTO product (slug, name, brand, primary_category, visibility, release_at, release_precision)
+SELECT
+  'ex-foamlite-classic', '[EX] FoamLite Classic',
+  (SELECT id FROM brand WHERE slug = 'ex-gear'),
+  (SELECT id FROM category WHERE slug = 'sleeping-pads'),
+  'public', '2020-01-01', 'year'
+WHERE NOT EXISTS (
+  SELECT 1 FROM product p
+  JOIN brand b ON b.id = p.brand
+  WHERE b.slug = 'ex-gear' AND p.slug = 'ex-foamlite-classic' AND p.is_deleted = FALSE
+);
+
+INSERT INTO product_variant (product, slug, name, is_default)
+SELECT p.id, v.slug, v.name, v.is_default
+FROM product p
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  ('regular', 'Regular', TRUE),
+  ('small',   'Small',   FALSE)
+) AS v(slug, name, is_default) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-foamlite-classic' AND p.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant pv
+    WHERE pv.product = p.id AND pv.slug = v.slug AND pv.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),    410.0),
+  (sp_attr('r_value'),       2.0),
+  (sp_attr('thickness_mm'), 20.0),
+  (sp_attr('length_mm'),  1830.0),
+  (sp_attr('width_mm'),    510.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-foamlite-classic' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, bool_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('astm_tested'),         FALSE),
+  (sp_attr('pump_included'),       FALSE),
+  (sp_attr('integrated_pump'),     FALSE),
+  (sp_attr('included_stuff_sack'), FALSE),
+  (sp_attr('repair_kit_included'), FALSE)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-foamlite-classic' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'closed-cell-foam-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'foam-core')),
+  (sp_attr('shape'),                  sp_enum('shape', 'rectangular')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'three-season')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'regular')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-foamlite-classic' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- Small
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),    280.0),
+  (sp_attr('r_value'),       2.0),
+  (sp_attr('thickness_mm'), 20.0),
+  (sp_attr('length_mm'),  1520.0),
+  (sp_attr('width_mm'),    510.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-foamlite-classic' AND pv.slug = 'small'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'closed-cell-foam-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'foam-core')),
+  (sp_attr('shape'),                  sp_enum('shape', 'rectangular')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'three-season')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'regular')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-foamlite-classic' AND pv.slug = 'small'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- ─────────────────────────────────────────
+-- [EX] SelfRest Comfort  (self-inflating foam core)
+-- ─────────────────────────────────────────
+
+INSERT INTO product (slug, name, brand, primary_category, visibility, release_at, release_precision)
+SELECT
+  'ex-selfrest-comfort', '[EX] SelfRest Comfort',
+  (SELECT id FROM brand WHERE slug = 'ex-gear'),
+  (SELECT id FROM category WHERE slug = 'sleeping-pads'),
+  'public', '2022-06-01', 'month'
+WHERE NOT EXISTS (
+  SELECT 1 FROM product p
+  JOIN brand b ON b.id = p.brand
+  WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND p.is_deleted = FALSE
+);
+
+INSERT INTO product_variant (product, slug, name, is_default)
+SELECT p.id, v.slug, v.name, v.is_default
+FROM product p
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  ('regular',      'Regular',       TRUE),
+  ('regular-wide', 'Regular Wide',  FALSE)
+) AS v(slug, name, is_default) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND p.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant pv
+    WHERE pv.product = p.id AND pv.slug = v.slug AND pv.is_deleted = FALSE
+  );
+
+-- Regular
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),           680.0),
+  (sp_attr('r_value'),              3.5),
+  (sp_attr('thickness_mm'),         50.0),
+  (sp_attr('length_mm'),          1830.0),
+  (sp_attr('width_mm'),            510.0),
+  (sp_attr('packed_volume_ml'),   2800.0),
+  (sp_attr('packed_length_mm'),    460.0),
+  (sp_attr('packed_diameter_mm'),   90.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, bool_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('astm_tested'),         FALSE),
+  (sp_attr('pump_included'),       FALSE),
+  (sp_attr('integrated_pump'),     TRUE),
+  (sp_attr('included_stuff_sack'), TRUE),
+  (sp_attr('repair_kit_included'), FALSE)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'self-inflating-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'foam-core')),
+  (sp_attr('shape'),                  sp_enum('shape', 'rectangular')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'three-season')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'regular')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, string_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('fabric_material_text'),    '75D polyester / PU coated'),
+  (sp_attr('top_fabric_denier_text'),  '75D'),
+  (sp_attr('bottom_fabric_denier_text'), '75D'),
+  (sp_attr('valve_type_text'),         'Twist valve')
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- Regular Wide
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),           830.0),
+  (sp_attr('r_value'),              3.5),
+  (sp_attr('thickness_mm'),         50.0),
+  (sp_attr('length_mm'),          1830.0),
+  (sp_attr('width_mm'),            640.0),
+  (sp_attr('packed_volume_ml'),   3500.0),
+  (sp_attr('packed_length_mm'),    460.0),
+  (sp_attr('packed_diameter_mm'),  100.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND pv.slug = 'regular-wide'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'self-inflating-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'foam-core')),
+  (sp_attr('shape'),                  sp_enum('shape', 'rectangular')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'three-season')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'regular-wide')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-selfrest-comfort' AND pv.slug = 'regular-wide'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- ─────────────────────────────────────────
+-- [EX] DownDream Expedition  (down-insulated air pad)
+-- ─────────────────────────────────────────
+
+INSERT INTO product (slug, name, brand, primary_category, visibility, release_at, release_precision)
+SELECT
+  'ex-downdream-exp', '[EX] DownDream Expedition',
+  (SELECT id FROM brand WHERE slug = 'ex-gear'),
+  (SELECT id FROM category WHERE slug = 'sleeping-pads'),
+  'public', '2023-09-01', 'month'
+WHERE NOT EXISTS (
+  SELECT 1 FROM product p
+  JOIN brand b ON b.id = p.brand
+  WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND p.is_deleted = FALSE
+);
+
+INSERT INTO product_variant (product, slug, name, is_default)
+SELECT p.id, v.slug, v.name, v.is_default
+FROM product p
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  ('regular',      'Regular',       TRUE),
+  ('long-wide',    'Long Wide',     FALSE)
+) AS v(slug, name, is_default) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND p.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant pv
+    WHERE pv.product = p.id AND pv.slug = v.slug AND pv.is_deleted = FALSE
+  );
+
+-- Regular
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),           620.0),
+  (sp_attr('r_value'),              9.5),
+  (sp_attr('thickness_mm'),        130.0),
+  (sp_attr('length_mm'),          1830.0),
+  (sp_attr('width_mm'),            510.0),
+  (sp_attr('packed_volume_ml'),   1200.0),
+  (sp_attr('packed_length_mm'),    280.0),
+  (sp_attr('packed_diameter_mm'),  115.0),
+  (sp_attr('baffle_count'),         16.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, bool_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('astm_tested'),         TRUE),
+  (sp_attr('pump_included'),       TRUE),
+  (sp_attr('integrated_pump'),     FALSE),
+  (sp_attr('included_stuff_sack'), TRUE),
+  (sp_attr('repair_kit_included'), TRUE),
+  (sp_attr('can_link_two_pads'),   TRUE)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'air-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'down-insulation')),
+  (sp_attr('shape'),                  sp_enum('shape', 'mummy')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'expedition')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'regular')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, string_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('fabric_material_text'),    '20D ripstop nylon / down-proof'),
+  (sp_attr('top_fabric_denier_text'),  '20D'),
+  (sp_attr('bottom_fabric_denier_text'), '20D'),
+  (sp_attr('valve_type_text'),         'Twist flat valve'),
+  (sp_attr('notes_text'),              'Linkable to second pad via integrated connector clips')
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND pv.slug = 'regular'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+-- Long Wide
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, number_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('weight_g'),           820.0),
+  (sp_attr('r_value'),              9.5),
+  (sp_attr('thickness_mm'),        130.0),
+  (sp_attr('length_mm'),          1960.0),
+  (sp_attr('width_mm'),            640.0),
+  (sp_attr('packed_volume_ml'),   1650.0),
+  (sp_attr('packed_length_mm'),    300.0),
+  (sp_attr('packed_diameter_mm'),  130.0),
+  (sp_attr('baffle_count'),         20.0)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND pv.slug = 'long-wide'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, bool_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('astm_tested'),         TRUE),
+  (sp_attr('pump_included'),       TRUE),
+  (sp_attr('integrated_pump'),     FALSE),
+  (sp_attr('included_stuff_sack'), TRUE),
+  (sp_attr('repair_kit_included'), TRUE),
+  (sp_attr('can_link_two_pads'),   TRUE)
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND pv.slug = 'long-wide'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
+
+INSERT INTO product_variant_attribute_value (product_variant, category_attribute, enum_value)
+SELECT pv.id, ca_id, val
+FROM product_variant pv
+JOIN product p ON p.id = pv.product
+JOIN brand b ON b.id = p.brand
+JOIN (VALUES
+  (sp_attr('pad_type'),               sp_enum('pad_type', 'air-pad')),
+  (sp_attr('insulation_type'),        sp_enum('insulation_type', 'down-insulation')),
+  (sp_attr('shape'),                  sp_enum('shape', 'rectangular')),
+  (sp_attr('intended_season_rating'), sp_enum('intended_season_rating', 'expedition')),
+  (sp_attr('size_class'),             sp_enum('size_class', 'long-wide')),
+  (sp_attr('sex_specific_design'),    sp_enum('sex_specific_design', 'unisex'))
+) AS v(ca_id, val) ON TRUE
+WHERE b.slug = 'ex-gear' AND p.slug = 'ex-downdream-exp' AND pv.slug = 'long-wide'
+  AND p.is_deleted = FALSE AND pv.is_deleted = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM product_variant_attribute_value x
+    WHERE x.product_variant = pv.id AND x.category_attribute = v.ca_id AND x.is_deleted = FALSE
+  );
