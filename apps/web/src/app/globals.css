@@ -228,10 +228,10 @@
     border-bottom-color: var(--color-accent-alpine);
   }
 
-  /* Content container */
+  /* Content container — left-pinned so the left edge never shifts */
   .ui-content-container {
     max-width: 1400px;
-    margin: 0 auto;
+    margin: 0;
     padding: 0 1.5rem;
   }
 
