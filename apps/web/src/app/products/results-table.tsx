@@ -12,11 +12,11 @@ interface ResultsTableProps {
 function formatNumberValue(value: number, unit: string | null | undefined): string {
   switch (unit) {
     case "weight_g":
-      return `${value} g`;
+      return `${value}g`;
     case "length_mm":
-      return `${value} mm`;
+      return `${value}mm`;
     case "volume_ml":
-      return `${value} ml`;
+      return `${value}ml`;
     default:
       return String(value);
   }
