@@ -28,10 +28,10 @@ function renderCellValue(
 ): React.ReactNode {
   if (column.key === "productName") {
     return (
-      <span>
+      <span className="flex flex-col leading-tight">
         <span className="font-medium text-charcoal">{row.productName}</span>
         {row.variantName && (
-          <span className="text-slate text-sm"> — {row.variantName}</span>
+          <span className="text-xs" style={{ color: "var(--color-accent-alpine)" }}>{row.variantName}</span>
         )}
       </span>
     );
@@ -113,7 +113,7 @@ export function ResultsTable({
                 );
               }
 
-              return <th key={col.key} className={cn(isNumeric && "text-right")}>{col.label}</th>;
+              return <th key={col.key} className={cn(isNumeric && "text-right", col.key === "productName" && "product-table-name-col")}>{col.label}</th>;
             })}
           </tr>
         </thead>
@@ -131,7 +131,7 @@ export function ResultsTable({
             rows.map((row) => (
               <tr key={row.variantId}>
                 {columns.map((col) => (
-                  <td key={col.key} className={cn(col.numberUnit != null && "text-right")}>{renderCellValue(row, col)}</td>
+                  <td key={col.key} className={cn(col.numberUnit != null && "text-right", col.key === "productName" && "product-table-name-col")}>{renderCellValue(row, col)}</td>
                 ))}
               </tr>
             ))

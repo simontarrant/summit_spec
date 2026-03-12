@@ -481,21 +481,23 @@ export function ProductSearch() {
       <div className="product-search-controls-row">
         <button
           type="button"
-          className="ui-button-primary text-sm px-3 py-1.5"
+          className="filter-toggle-btn"
           aria-expanded={!filtersCollapsed}
           aria-controls="product-filter-controls"
           onClick={() => setFiltersCollapsed((prev) => !prev)}
         >
-          {filtersCollapsed ? "Show Filters" : "Hide Filters"}
+          <span>Filters</span>
+          <span className="filter-toggle-chevron">{filtersCollapsed ? "▼" : "▲"}</span>
         </button>
-        <button
-          type="button"
-          className="ui-button-accent text-sm px-3 py-1.5"
-          onClick={handleClearFilters}
-          disabled={!hasActiveFilters}
-        >
-          Clear Filters
-        </button>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            className="filter-clear-btn"
+            onClick={handleClearFilters}
+          >
+            (clear)
+          </button>
+        )}
       </div>
       {!filtersCollapsed && (
         <section
@@ -503,7 +505,6 @@ export function ProductSearch() {
           className="product-filter-section"
           aria-label="Filters"
         >
-          <div className="product-section-label">Filters</div>
           <FilterPanel
             attributes={resolvedAttributes}
             filterState={filterState}
