@@ -130,7 +130,7 @@ export default function LoginPage() {
           </p>
 
           {/* Tabs */}
-          <div className="flex gap-2 mt-6 border-b border-grey-200">
+          <div className="flex gap-2 mt-6 border-b border-[var(--color-border-subtle)]">
             <button
               onClick={() => {
                 setActiveTab("login");
@@ -163,7 +163,7 @@ export default function LoginPage() {
 
           {/* Error */}
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            <div className="mt-4 ui-error-message">
               {error}
             </div>
           )}

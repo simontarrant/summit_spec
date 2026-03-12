@@ -9,9 +9,10 @@ export function LinearInput({ className, ...props }: LinearInputProps) {
       {...props}
       className={cn(
         "w-full bg-transparent text-sm",
-        "border-0 border-b border-slate-200",
-        "focus:border-slate-400 focus:outline-none",
-        "hover:border-slate-300",
+        "border-0 border-b border-[var(--color-border-subtle)]",
+        "focus:border-[var(--color-accent-alpine)] focus:outline-none",
+        "hover:border-[var(--color-border-strong)]",
+        "text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]",
         "py-1.5 px-1",
         "transition-colors",
         className

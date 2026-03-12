@@ -232,28 +232,29 @@ function EnumFilterControl({
           className={cn(
             "flex items-center justify-between gap-4",
             "bg-transparent text-sm text-left cursor-pointer",
+            "text-[var(--color-text-primary)]",
             "border-0 border-b py-1.5 pl-1 pr-6",
             "focus:outline-none transition-colors",
             open
-              ? "border-slate-400"
-              : "border-slate-200 hover:border-slate-300"
+              ? "border-[var(--color-accent-alpine)]"
+              : "border-[var(--color-border-subtle)] hover:border-[var(--color-border-strong)]"
           )}
           style={{ minWidth: "7rem" }}
         >
-          <span className={cn(selected.size === 0 && "text-slate-400")}>
+          <span className={cn(selected.size === 0 && "text-[var(--color-text-muted)]")}>
             {triggerLabel}
           </span>
         </button>
-        <div className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-slate-500 text-xs">
+        <div className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] text-xs">
           ▼
         </div>
 
         {open && (
-          <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-slate-200 rounded shadow-md py-1 min-w-full">
+          <div className="absolute z-50 top-full left-0 mt-1 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] rounded py-1 min-w-full" style={{boxShadow: '0 4px 12px rgba(0,0,0,0.4)'}}>
             {options.map((opt) => (
               <label
                 key={opt.id}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer hover:bg-[var(--color-grey-50)]"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer text-[var(--color-text-secondary)] hover:bg-[var(--color-border-subtle)] hover:text-[var(--color-text-primary)]"
               >
                 <input
                   type="checkbox"
