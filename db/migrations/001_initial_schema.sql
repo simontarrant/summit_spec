@@ -10,6 +10,7 @@ CREATE TYPE number_unit AS ENUM (
   'weight_g',
   'length_mm',
   'volume_ml',
+  'temperature_c',
   'int',
   'float',
   'NA'

@@ -17,6 +17,8 @@ function formatNumberValue(value: number, unit: string | null | undefined): stri
       return `${value}mm`;
     case "volume_ml":
       return `${value}ml`;
+    case "temperature_c":
+      return `${value}°C`;
     default:
       return String(value);
   }

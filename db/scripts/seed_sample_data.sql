@@ -51,8 +51,8 @@ INSERT INTO attribute (slug, name, description, type, number_unit) VALUES
 ('packed-volume', 'Packed Volume', 'Volume when packed', 'number', 'volume_ml'),
 
 -- Temperature ratings
-('temp-rating', 'Temperature Rating', 'Comfort temperature rating in Celsius', 'number', 'float'),
-('temp-limit', 'Temperature Limit', 'Lower limit temperature in Celsius', 'number', 'float'),
+('temp-rating', 'Temperature Rating', 'Comfort temperature rating in Celsius', 'number', 'temperature_c'),
+('temp-limit', 'Temperature Limit', 'Lower limit temperature in Celsius', 'number', 'temperature_c'),
 ('r-value', 'R-Value', 'Thermal resistance value', 'number', 'float'),
 
 -- Boolean attributes
