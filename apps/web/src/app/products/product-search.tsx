@@ -23,6 +23,7 @@ import type {
 const tabs = [
   { label: "Example", href: "/example" },
   { label: "Products", href: "/products" },
+  { label: "About", href: "/about" },
 ];
 
 // --- Schema resolution helpers ---
