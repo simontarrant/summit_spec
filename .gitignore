@@ -50,3 +50,6 @@ obsidian_docs/.obsidian/
 !obsidian_docs/.obsidian/workspace.json
 
 node_modules/
+
+.agent*
+
