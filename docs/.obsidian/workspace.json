@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "technical/DB.md",
+                "file": "agent_tasks/technical/Infra Update - AWS Fargate.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "DB"
+              "title": "Infra Update - AWS Fargate"
             }
           }
         ]
@@ -185,6 +185,7 @@
   },
   "active": "3a85fb732ee053c7",
   "lastOpenFiles": [
+    "agent_tasks/technical/Infra Update - AWS Fargate.md",
     "technical/Product Search.md",
     "technical/Design Inventory (Patterns).md",
     "technical/DB.md",

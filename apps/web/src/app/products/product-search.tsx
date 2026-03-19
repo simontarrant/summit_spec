@@ -11,6 +11,8 @@ import { useDebounce } from "./use-debounce";
 import type {
   SchemaResponse,
   SearchResponse,
+  GoSearchResponse,
+  SearchColumn,
   AttributeDef,
   CategoryNode,
   FilterState,
@@ -19,6 +21,8 @@ import type {
   SortSpec,
   Filter,
 } from "./types";
+
+const SEARCH_API_URL = process.env.NEXT_PUBLIC_SEARCH_API_URL || "";
 
 const tabs = [
   { label: "Example", href: "/example" },
@@ -110,6 +114,50 @@ function resolveAttributes(
   }
 
   return result;
+}
+
+// --- Column builder (for Go API responses without columns) ---
+
+function buildColumns(
+  resolvedAttrs: AttributeDef[],
+  filters: Filter[]
+): SearchColumn[] {
+  const columns: SearchColumn[] = [
+    { key: "productName", label: "Product", pinned: true },
+    { key: "brandName", label: "Brand", pinned: true },
+  ];
+
+  const addedAttrIds = new Set<string>();
+
+  // Filtered attributes first (in filter order)
+  for (const f of filters) {
+    if (addedAttrIds.has(f.attributeId)) continue;
+    const attr = resolvedAttrs.find((a) => a.id === f.attributeId);
+    if (!attr) continue;
+    addedAttrIds.add(f.attributeId);
+    columns.push(makeAttrColumn(attr));
+  }
+
+  // Then remaining resolved attributes in priority order
+  for (const attr of resolvedAttrs) {
+    if (addedAttrIds.has(attr.id)) continue;
+    addedAttrIds.add(attr.id);
+    columns.push(makeAttrColumn(attr));
+  }
+
+  return columns;
+}
+
+function makeAttrColumn(attr: AttributeDef): SearchColumn {
+  return {
+    key: `attr:${attr.id}`,
+    label: attr.name,
+    attributeId: attr.id,
+    type: attr.type,
+    numberUnit: attr.type === "number" ? attr.numberUnit : null,
+    sortable: attr.type !== "enum_list",
+    pinned: false,
+  };
 }
 
 // --- Filter <-> URL serialization ---
@@ -351,8 +399,12 @@ export function ProductSearch() {
       const filters = buildApiFilters(debouncedFilterState, schema!.attributes);
       const offset = (page - 1) * limit;
 
+      const searchUrl = SEARCH_API_URL
+        ? `${SEARCH_API_URL}/products/search`
+        : "/api/products/search";
+
       try {
-        const res = await fetch("/api/products/search", {
+        const res = await fetch(searchUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -369,7 +421,13 @@ export function ProductSearch() {
             const data = await res.json().catch(() => null);
             setSearchError(data?.error ?? `Search failed (${res.status})`);
             setSearchResult(null);
+          } else if (SEARCH_API_URL) {
+            // Go API response: no columns — build them client-side
+            const data: GoSearchResponse = await res.json();
+            const columns = buildColumns(resolvedAttributes, filters);
+            setSearchResult({ ...data, columns });
           } else {
+            // Next.js fallback: response includes columns
             const data: SearchResponse = await res.json();
             setSearchResult(data);
           }
@@ -389,7 +447,7 @@ export function ProductSearch() {
     return () => {
       cancelled = true;
     };
-  }, [schema, categoryId, debouncedFilterState, sort, page, limit]);
+  }, [schema, categoryId, debouncedFilterState, sort, page, limit, resolvedAttributes]);
 
   // Sync state to URL
   useEffect(() => {

@@ -1,6 +1,7 @@
 .PHONY: help setup dev clean install \
         db-up db-down db-reset db-reset-canonical db-migrate db-seed db-seed-canonical \
         web-dev web-build web-start web-clean \
+        api-dev api-build api-docker-build \
         prisma-pull prisma-generate prisma-studio \
         dev-all stop-all \
         status check clean-all \
@@ -41,6 +42,11 @@ help:
 	@echo "  make web-dev            - Run Next.js dev server"
 	@echo "  make web-build          - Build Next.js for production"
 	@echo "  make web-start          - Start Next.js production server"
+	@echo ""
+	@echo "$(GREEN)API Commands (Go):$(RESET)"
+	@echo "  make api-dev            - Run Go API dev server (port 8080)"
+	@echo "  make api-build          - Build Go API binary"
+	@echo "  make api-docker-build   - Build Go API Docker image"
 	@echo ""
 	@echo "$(GREEN)Prisma Commands:$(RESET)"
 	@echo "  make prisma-pull        - Pull database schema into Prisma (introspect)"
@@ -136,6 +142,22 @@ web-start:
 
 web-clean:
 	@cd apps/web && $(MAKE) clean
+
+# =============================================================================
+# API Commands (Go)
+# =============================================================================
+
+api-dev:
+	@echo "$(CYAN)Starting Go API server...$(RESET)"
+	@cd apps/api && $(MAKE) dev
+
+api-build:
+	@echo "$(CYAN)Building Go API...$(RESET)"
+	@cd apps/api && $(MAKE) build
+
+api-docker-build:
+	@echo "$(CYAN)Building Go API Docker image...$(RESET)"
+	@cd apps/api && $(MAKE) docker-build
 
 # =============================================================================
 # Prisma Commands

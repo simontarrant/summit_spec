@@ -18,6 +18,26 @@ interface EnumAttributeValue {
 }
 
 export async function GET() {
+  // If SEARCH_API_URL is set, proxy to the Go API
+  const searchApiUrl = process.env.SEARCH_API_URL;
+  if (searchApiUrl) {
+    try {
+      const res = await fetch(`${searchApiUrl}/categories/schema`);
+      if (!res.ok) {
+        throw new Error(`Go API returned ${res.status}`);
+      }
+      const data = await res.json();
+      return NextResponse.json(data);
+    } catch (error) {
+      console.error("Failed to fetch schema from Go API:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
+  }
+
+  // Fallback: direct Prisma queries
   try {
     const [categories, categoryAttributes] = await Promise.all([
       prisma.category.findMany({
