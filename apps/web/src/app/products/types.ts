@@ -99,6 +99,16 @@ export interface SearchResponse {
   };
 }
 
+// Response from Go API (no columns — frontend builds them from schema)
+export interface GoSearchResponse {
+  rows: SearchRow[];
+  pagination: {
+    limit: number;
+    offset: number;
+    totalRows: number;
+  };
+}
+
 // --- Local UI state ---
 
 export interface NumberFilterState {
