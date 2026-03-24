@@ -11,7 +11,7 @@ const tabs = [
 export default function AboutPage() {
   return (
     <AppShell tabs={tabs} pageTitle="About">
-      <main className="ui-page">
+      <main className="ui-page ui-prose">
         <section className="ui-card">
           <p className="ui-label">The origin story</p>
           <h2>Down Booties & Spreadsheets</h2>
