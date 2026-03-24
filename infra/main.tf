@@ -31,20 +31,20 @@ module "vpc" {
 }
 
 ############################
-# SECURITY GROUP
+# SECURITY GROUPS
 ############################
 
-resource "aws_security_group" "db" {
-  name   = "summit-spec-db-sg"
+# ECS SG (public API access)
+resource "aws_security_group" "ecs" {
+  name   = "summit-spec-ecs-sg"
   vpc_id = module.vpc.vpc_id
 
   ingress {
-    description = "Postgres access (dev)"
-    from_port   = 5432
-    to_port     = 5432
+    description = "Public API access"
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
-
-    cidr_blocks = ["0.0.0.0/0"] # dev only
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -55,18 +55,29 @@ resource "aws_security_group" "db" {
   }
 }
 
-resource "aws_security_group_rule" "db_from_ecs" {
-  type                     = "ingress"
-  from_port                = 5432
-  to_port                  = 5432
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.db.id
-  source_security_group_id = aws_security_group.ecs.id
-  description              = "Postgres from ECS Fargate"
+# DB SG (only ECS can access)
+resource "aws_security_group" "db" {
+  name   = "summit-spec-db-sg"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    description     = "Postgres from ECS"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 ############################
-# SUBNET GROUP
+# DB SUBNET GROUP
 ############################
 
 resource "aws_db_subnet_group" "db_subnets" {
@@ -83,7 +94,6 @@ resource "aws_db_instance" "postgres" {
 
   engine         = "postgres"
   engine_version = "16"
-
   instance_class = "db.t4g.micro"
 
   allocated_storage = 20
@@ -104,103 +114,22 @@ resource "aws_db_instance" "postgres" {
 ############################
 
 resource "aws_ecr_repository" "api" {
-  name                 = "summit-spec-api"
-  image_tag_mutability = "MUTABLE"
-  force_delete         = true
+  name         = "summit-spec-api"
+  force_delete = true
 }
 
 ############################
-# CLOUDWATCH
+# CLOUDWATCH LOGS
 ############################
 
 resource "aws_cloudwatch_log_group" "api" {
   name              = "/ecs/summit-spec-api"
-  retention_in_days = 14
-}
-
-############################
-# ALB
-############################
-
-resource "aws_security_group" "alb" {
-  name   = "summit-spec-alb-sg"
-  vpc_id = module.vpc.vpc_id
-
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_lb" "api" {
-  name               = "summit-spec-api-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb.id]
-  subnets            = module.vpc.public_subnets
-}
-
-resource "aws_lb_target_group" "api" {
-  name        = "summit-spec-api-tg"
-  port        = 8080
-  protocol    = "HTTP"
-  vpc_id      = module.vpc.vpc_id
-  target_type = "ip"
-
-  health_check {
-    path                = "/health"
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-    matcher             = "200"
-  }
-}
-
-resource "aws_lb_listener" "api" {
-  load_balancer_arn = aws_lb.api.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.api.arn
-  }
+  retention_in_days = 7
 }
 
 ############################
 # ECS
 ############################
-
-resource "aws_security_group" "ecs" {
-  name   = "summit-spec-ecs-sg"
-  vpc_id = module.vpc.vpc_id
-
-  ingress {
-    description     = "From ALB"
-    from_port       = 8080
-    to_port         = 8080
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
 
 resource "aws_ecs_cluster" "main" {
   name = "summit-spec"
@@ -246,8 +175,10 @@ resource "aws_ecs_task_definition" "api" {
 
     environment = [
       { name = "PORT", value = "8080" },
-      { name = "DATABASE_URL", value = "postgresql://${var.db_user}:${var.db_password}@${aws_db_instance.postgres.address}:5432/summit_spec" },
-      { name = "CORS_ORIGIN", value = var.cors_origin },
+      {
+        name  = "DATABASE_URL",
+        value = "postgresql://${var.db_user}:${var.db_password}@${aws_db_instance.postgres.address}:5432/summit_spec"
+      }
     ]
 
     logConfiguration = {
@@ -273,12 +204,4 @@ resource "aws_ecs_service" "api" {
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = true
   }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.api.arn
-    container_name   = "api"
-    container_port   = 8080
-  }
-
-  depends_on = [aws_lb_listener.api]
 }
