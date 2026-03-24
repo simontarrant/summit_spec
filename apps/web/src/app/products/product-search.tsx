@@ -27,6 +27,7 @@ const SEARCH_API_URL = process.env.NEXT_PUBLIC_SEARCH_API_URL || "";
 const tabs = [
   { label: "Example", href: "/example" },
   { label: "Products", href: "/products" },
+  { label: "About", href: "/about" },
 ];
 
 // --- Schema resolution helpers ---
