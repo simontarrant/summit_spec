@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { AppShell } from "@/components/ui/app_shell";
 import { CategorySelector } from "./category-selector";
@@ -292,12 +292,29 @@ function buildApiFilters(
   return filters;
 }
 
+// --- Search params reader (isolated so Suspense only wraps this small component) ---
+
+function SearchParamsReader({
+  onMount,
+}: {
+  onMount: (params: URLSearchParams) => void;
+}) {
+  const searchParams = useSearchParams();
+  const onMountRef = useRef(onMount);
+  onMountRef.current = onMount;
+  useEffect(() => {
+    onMountRef.current(searchParams);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
+
 // --- Component ---
 
 export function ProductSearch() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+
+  const [initialSearchParams, setInitialSearchParams] = useState<URLSearchParams | null>(null);
 
   const [schema, setSchema] = useState<SchemaResponse | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(true);
@@ -359,17 +376,17 @@ export function ProductSearch() {
     };
   }, []);
 
-  // Restore state from URL once schema is loaded
+  // Restore state from URL once schema and initial search params are loaded
   useEffect(() => {
-    if (!schema || initializedRef.current) return;
+    if (!schema || !initialSearchParams || initializedRef.current) return;
     initializedRef.current = true;
 
-    const cat = searchParams.get("cat");
+    const cat = initialSearchParams.get("cat");
     if (cat && findCategoryById(schema.categories, cat)) {
       setCategoryId(cat);
-      setFilterState(parseFiltersFromParams(searchParams, schema.attributes));
+      setFilterState(parseFiltersFromParams(initialSearchParams, schema.attributes));
 
-      const sortParam = searchParams.get("sort");
+      const sortParam = initialSearchParams.get("sort");
       if (sortParam) {
         const [attrId, dir] = sortParam.split(".");
         if (attrId && (dir === "asc" || dir === "desc")) {
@@ -377,16 +394,16 @@ export function ProductSearch() {
         }
       }
 
-      const pageParam = searchParams.get("page");
+      const pageParam = initialSearchParams.get("page");
       if (pageParam) setPage(Math.max(1, parseInt(pageParam, 10) || 1));
 
-      const limitParam = searchParams.get("limit");
+      const limitParam = initialSearchParams.get("limit");
       if (limitParam) {
         const l = parseInt(limitParam, 10);
         if ([10, 25, 50, 100].includes(l)) setLimit(l);
       }
     }
-  }, [schema, searchParams]);
+  }, [schema, initialSearchParams]);
 
   // Execute search when debounced filters, sort, page, limit, or categoryId change
   useEffect(() => {
@@ -574,43 +591,24 @@ export function ProductSearch() {
     </div>
   ) : null;
 
-  if (schemaLoading) {
-    return (
-      <AppShell tabs={tabs} pageTitle="Product Catalog">
-        <div className="ui-page">
-          <div className="ui-card">
-            <p className="text-slate py-8 text-center">
-              Loading categories...
-            </p>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
-  if (schemaError) {
-    return (
-      <AppShell tabs={tabs} pageTitle="Product Catalog">
-        <div className="ui-page">
-          <div className="ui-card">
-            <p className="text-warning py-8 text-center">{schemaError}</p>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
   return (
     <AppShell
       tabs={tabs}
       pageTitle="Product Catalog"
-      pageDescription="Browse and compare hiking gear"
+      pageDescription={!schemaLoading && !schemaError ? "Browse and compare hiking gear" : undefined}
       titleAddon={categorySelector}
       filterBar={filterBar}
     >
+      <Suspense>
+        <SearchParamsReader onMount={setInitialSearchParams} />
+      </Suspense>
       <div className="ui-page">
         <div className="ui-card">
-          {!categoryId ? (
+          {schemaLoading ? (
+            <p className="text-slate py-8 text-center">Loading categories...</p>
+          ) : schemaError ? (
+            <p className="text-warning py-8 text-center">{schemaError}</p>
+          ) : !categoryId ? (
             <p className="text-slate py-12 text-center">
               Select a category to browse products.
             </p>
