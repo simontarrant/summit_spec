@@ -11,10 +11,10 @@ const tabs = [
 export default function AboutPage() {
   return (
     <AppShell tabs={tabs} pageTitle="About">
-      <main className="ui-page">
+      <main className="ui-page max-w-2xl">
         <section className="ui-card">
           <p className="ui-label">The origin story</p>
-          <h2>Down Booties & Spreadsheets</h2>
+          <h2 className="text-[var(--color-primary)]">Down Booties &amp; Spreadsheets</h2>
           <p>
             Summit Spec started the way many side-projects do — with a problem
             that wouldn&apos;t leave me alone. I&apos;m a 23-year-old from
@@ -38,7 +38,7 @@ export default function AboutPage() {
 
         <section className="ui-card">
           <p className="ui-label">What this is</p>
-          <h2>A Gear Comparison Engine</h2>
+          <h2 className="text-[var(--color-primary)]">A Gear Comparison Engine</h2>
           <p>
             Summit Spec is built for hikers, thru-hikers, and outdoor
             enthusiasts who care about the numbers. Whether you&apos;re
@@ -56,7 +56,7 @@ export default function AboutPage() {
 
         <section className="ui-card">
           <p className="ui-label">Support the outdoors</p>
-          <h2>Trail Conservation</h2>
+          <h2 className="text-[var(--color-primary)]">Trail Conservation</h2>
           <p>
             The trails we love need looking after. That&apos;s why you&apos;ll
             find a link to{" "}
