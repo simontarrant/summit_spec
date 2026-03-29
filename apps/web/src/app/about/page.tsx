@@ -11,10 +11,10 @@ const tabs = [
 export default function AboutPage() {
   return (
     <AppShell tabs={tabs} pageTitle="About">
-      <main className="ui-page">
+      <main className="ui-page about-page">
         <section className="ui-card">
           <p className="ui-label">The origin story</p>
-          <h2>Down Booties & Spreadsheets</h2>
+          <h2>Down Booties &amp; Spreadsheets</h2>
           <p>
             Summit Spec started with a problem that wouldn&apos;t leave me alone. The problem recurred any time I needed to buy a new piece of hiking gear. The tipping point, however, was when I was shopping for a Christmas present for a friend: a pair of humble down booties. Sounds straightfoward.
           </p>
