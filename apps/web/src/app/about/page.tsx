@@ -11,10 +11,10 @@ const tabs = [
 export default function AboutPage() {
   return (
     <AppShell tabs={tabs} pageTitle="About">
-      <main className="ui-page">
-        <section className="ui-card">
+      <main className="ui-page max-w-2xl">
+        <section className="ui-card flex flex-col gap-3 border-l-2 border-[var(--color-accent-alpine)] pl-4">
           <p className="ui-label">The origin story</p>
-          <h2>Down Booties & Spreadsheets</h2>
+          <h2 className="text-xl">Down Booties &amp; Spreadsheets</h2>
           <p>
             Summit Spec started with a problem that wouldn&apos;t leave me alone. The problem recurred any time I needed to buy a new piece of hiking gear. The tipping point, however, was when I was shopping for a Christmas present for a friend: a pair of humble down booties. Sounds straightfoward.
           </p>
@@ -26,9 +26,9 @@ export default function AboutPage() {
           </p>
         </section>
 
-        <section className="ui-card">
+        <section className="ui-card flex flex-col gap-3 border-l-2 border-[var(--color-accent-alpine)] pl-4">
           <p className="ui-label">What this is</p>
-          <h2>A Gear Comparison Engine</h2>
+          <h2 className="text-xl">A Gear Comparison Engine</h2>
           <p>
             Summit Spec is built for hikers, thru-hikers, and outdoor enthusiasts who care about the numbers. Whether you&apos;re optimising your pack weight for a weekend mish or researching sleep systems for months long trail expeditions, this tool lets you compare products side by side on any spec that matters.
           </p>
@@ -37,9 +37,9 @@ export default function AboutPage() {
           </p>
         </section>
 
-        <section className="ui-card">
+        <section className="ui-card flex flex-col gap-3 border-l-2 border-[var(--color-accent-alpine)] pl-4">
           <p className="ui-label">Support the outdoors</p>
-          <h2>Trail Conservation</h2>
+          <h2 className="text-xl">Trail Conservation</h2>
           <p>
             The trails we love need looking after. That&apos;s why you&apos;ll find a link to{" "}
             <a
