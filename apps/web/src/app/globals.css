@@ -301,6 +301,28 @@
     background: transparent;
   }
 
+  /* Prose layout — readable width for long-form text pages */
+  .ui-prose {
+    max-width: 38rem;
+    gap: 2.5rem;
+  }
+
+  .ui-prose h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .ui-prose p + p {
+    margin-top: 0.625rem;
+  }
+
+  .ui-prose .ui-card + .ui-card {
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
   /* Section label */
   .ui-label {
     font-size: 0.6875rem;
